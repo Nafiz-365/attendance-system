@@ -1,0 +1,228 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+model User {
+  id        Int          @id @default(autoincrement())
+  name      String
+  email     String       @unique
+  password  String
+  role      UserRole     @default(ADMIN)
+  image     String?      // Profile Picture URL
+  createdAt DateTime     @default(now())
+  
+  // Relations: A user manages these entities
+  departments Department[]
+  students    Student[]
+  courses     Course[]
+  teacherProfile Teacher?
+  approvedLeaves LeaveRequest[] @relation("LeaveApprover")
+  notices     Notice[]
+  notifications Notification[]
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  title     String
+  message   String
+  type      String   @default("INFO") // INFO, WARNING, SUCCESS, ERROR
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Department {
+  id             Int       @id @default(autoincrement())
+  name           String
+  code           String
+  hod            String
+  totalStudents  Int       @default(0)
+  activeStudents Int       @default(0)
+  
+  // Relations
+  userId         Int
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  students       Student[]
+  courses        Course[]
+  teachers       Teacher[]
+
+  @@unique([code, userId]) // Code must be unique per user
+}
+
+model Course {
+  id           Int        @id @default(autoincrement())
+  name         String
+  code         String
+  credits      Int
+  instructor   String
+  
+  // Relations
+  departmentId Int
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  userId       Int
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  allocations  SubjectAllocation[]
+
+  @@unique([code, userId])
+}
+
+model Student {
+  id           Int          @id @default(autoincrement())
+  name         String
+  studentId    String       @unique
+  email        String       @unique
+  phone        String?
+  address      String?
+  batch        String       // "Batch 50", "Batch 51", etc.
+  section      String       // A, B, C, D, E, F, G, H, I, J
+  semester     String?
+  
+  // Relations
+  departmentId Int
+  department   Department   @relation(fields: [departmentId], references: [id])
+  userId       Int
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attendance   Attendance[]
+  leaveRequests LeaveRequest[]
+}
+
+model Attendance {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  status    String // "Present", "Absent", "Late"
+  
+  // Relations
+  studentId Int
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  allocationId Int?
+  allocation   SubjectAllocation? @relation(fields: [allocationId], references: [id])
+}
+
+model LeaveRequest {
+  id        Int      @id @default(autoincrement())
+  startDate DateTime
+  endDate   DateTime
+  reason    String
+  status    String   @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
+  createdAt DateTime @default(now())
+
+  // Relations
+  studentId Int?
+  student   Student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  teacherId Int?
+  teacher   Teacher? @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  approvedById Int?
+  approvedBy   User? @relation("LeaveApprover", fields: [approvedById], references: [id])
+}
+
+model Teacher {
+  id           Int        @id @default(autoincrement())
+  employeeId   String     @unique
+  name         String
+  email        String     @unique
+  phone        String?
+  subjects     String?    // JSON array of subject codes
+  createdAt    DateTime   @default(now())
+  
+  // Relations
+  userId       Int        @unique
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  departmentId Int
+  department   Department @relation(fields: [departmentId], references: [id])
+  
+  // New Fields for Enhanced Profile
+  designation   String?   // e.g. "Assistant Professor"
+  gender        String?   // e.g. "Male", "Female"
+  qualification String?   // e.g. "PhD, MSc"
+  joiningDate   DateTime?
+  address       String?   @db.Text
+  
+  allocations  SubjectAllocation[]
+  leaveRequests LeaveRequest[]
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model AcademicSession {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique // "Spring 2024"
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  allocations SubjectAllocation[]
+}
+
+model SubjectAllocation {
+  id        Int      @id @default(autoincrement())
+  
+  // Who is teaching?
+  teacherId Int
+  teacher   Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  
+  // What are they teaching?
+  courseId  Int
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  // To whom?
+  batch     String   // "Batch 50"
+  section   String   // "A"
+  
+  // When? (Which session)
+  sessionId Int
+  session   AcademicSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  routines    ClassRoutine[]
+  attendance  Attendance[] // Attendance is now linked to a specific "Class" (Subject+Batch)
+
+  @@unique([courseId, batch, section, sessionId]) // One allocation per subject-batch-section-session
+}
+
+model ClassRoutine {
+  id           Int      @id @default(autoincrement())
+  allocationId Int
+  allocation   SubjectAllocation @relation(fields: [allocationId], references: [id], onDelete: Cascade)
+  
+  dayOfWeek    DayOfWeek
+  startTime    String    // "10:00"
+  endTime      String    // "11:30"
+  roomNo       String?
+}
+
+model Notice {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String   @db.Text
+  audience  String   // "ALL", "TEACHERS", "STUDENTS"
+  isPublished Boolean @default(true)
+  createdAt DateTime @default(now())
+
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
