@@ -1,17 +1,43 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2, Mail, BookOpen, Calendar, User, GraduationCap, Building2, Camera, Trash2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { ImageCropper } from "@/components/image-cropper";
-import { useToast } from "@/components/ui/toast";
+import { useEffect, useState, useRef } from 'react';
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Loader2,
+    Mail,
+    BookOpen,
+    Calendar,
+    User,
+    GraduationCap,
+    Building2,
+    Camera,
+    Trash2,
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ImageCropper } from '@/components/image-cropper';
+import { useToast } from '@/components/ui/toast';
+
+interface StudentUser {
+    id: string;
+    name: string;
+    email: string;
+    image?: string | null;
+    department?: {
+        name: string;
+    };
+}
 
 export default function StudentProfilePage() {
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<StudentUser | null>(null);
     const [loading, setLoading] = useState(true);
     const [imageSrc, setImageSrc] = useState<string | null>(null);
     const [isCropperOpen, setIsCropperOpen] = useState(false);
@@ -19,7 +45,7 @@ export default function StudentProfilePage() {
     const { addToast } = useToast();
 
     useEffect(() => {
-        const userStr = localStorage.getItem("user");
+        const userStr = localStorage.getItem('user');
         if (userStr) {
             setUser(JSON.parse(userStr));
         }
@@ -30,7 +56,7 @@ export default function StudentProfilePage() {
         if (e.target.files && e.target.files.length > 0) {
             const file = e.target.files[0];
             const reader = new FileReader();
-            reader.addEventListener("load", () => {
+            reader.addEventListener('load', () => {
                 setImageSrc(reader.result?.toString() || null);
                 setIsCropperOpen(true);
             });
@@ -40,49 +66,64 @@ export default function StudentProfilePage() {
 
     const handleCropComplete = async (croppedBlob: Blob) => {
         try {
-            const formData = new FormData();
-            formData.append("file", croppedBlob, "profile-pic.jpg");
+            if (!user) throw new Error('User not found');
 
-            const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
-            if (!uploadRes.ok) throw new Error("Upload failed");
+            const formData = new FormData();
+            formData.append('file', croppedBlob, 'profile-pic.jpg');
+
+            const uploadRes = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+            if (!uploadRes.ok) throw new Error('Upload failed');
             const { imageUrl } = await uploadRes.json();
 
-            const updateRes = await fetch("/api/profile/update", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
+            const updateRes = await fetch('/api/profile/update', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: user.id, image: imageUrl }),
             });
 
             if (!updateRes.ok) {
                 const err = await updateRes.json();
-                throw new Error(err.details || err.error || "Update failed");
+                throw new Error(err.details || err.error || 'Update failed');
             }
 
             const updatedUser = { ...user, image: imageUrl };
             setUser(updatedUser);
-            localStorage.setItem("user", JSON.stringify(updatedUser));
+            localStorage.setItem('user', JSON.stringify(updatedUser));
 
             setIsCropperOpen(false);
             setImageSrc(null);
 
-            addToast("Profile picture updated.", "success");
-            window.dispatchEvent(new Event("storage"));
-
-        } catch (error: any) {
+            addToast('Profile picture updated.', 'success');
+            window.dispatchEvent(new Event('storage'));
+        } catch (error: Error | unknown) {
             console.error(error);
-            addToast(`Failed: ${error.message}`, "error");
+            const message =
+                error instanceof Error ? error.message : 'Unknown error';
+            addToast(`Failed: ${message}`, 'error');
         }
     };
 
-    if (loading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>;
+    if (loading)
+        return (
+            <div className="p-8 flex justify-center">
+                <Loader2 className="animate-spin h-8 w-8 text-primary" />
+            </div>
+        );
 
     if (!user) return <div className="p-8">User not found.</div>;
 
     return (
         <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
             <div>
-                <h2 className="text-3xl font-bold tracking-tight vibe-text-platinum">Student Profile</h2>
-                <p className="text-muted-foreground">View your academic profile details</p>
+                <h2 className="text-3xl font-bold tracking-tight vibe-text-platinum">
+                    Student Profile
+                </h2>
+                <p className="text-muted-foreground">
+                    View your academic profile details
+                </p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-[1fr_2fr]">
@@ -98,7 +139,9 @@ export default function StudentProfilePage() {
                                 />
                             ) : (
                                 <div className="w-full h-full rounded-full bg-gradient-to-br from-sky-50 to-sky-100 dark:from-sky-900/40 dark:to-sky-900/10 flex items-center justify-center ring-4 ring-sky-300/30 shadow-xl shadow-sky-500/20">
-                                    <span className="text-5xl font-bold text-sky-600 dark:text-sky-300">{user.name?.charAt(0) || "S"}</span>
+                                    <span className="text-5xl font-bold text-sky-600 dark:text-sky-300">
+                                        {user.name?.charAt(0) || 'S'}
+                                    </span>
                                 </div>
                             )}
 
@@ -112,27 +155,60 @@ export default function StudentProfilePage() {
                             {user.image && (
                                 <button
                                     onClick={async () => {
-                                        if (!confirm("Are you sure you want to remove your profile picture?")) return;
+                                        if (
+                                            !confirm(
+                                                'Are you sure you want to remove your profile picture?'
+                                            )
+                                        )
+                                            return;
 
                                         try {
-                                            const res = await fetch("/api/profile/update", {
-                                                method: "PUT",
-                                                headers: { "Content-Type": "application/json" },
-                                                body: JSON.stringify({ id: user.id, image: null }),
-                                            });
+                                            const res = await fetch(
+                                                '/api/profile/update',
+                                                {
+                                                    method: 'PUT',
+                                                    headers: {
+                                                        'Content-Type':
+                                                            'application/json',
+                                                    },
+                                                    body: JSON.stringify({
+                                                        id: user.id,
+                                                        image: null,
+                                                    }),
+                                                }
+                                            );
 
                                             if (res.ok) {
-                                                const newUser = { ...user, image: null };
+                                                const newUser = {
+                                                    ...user,
+                                                    image: null,
+                                                };
                                                 setUser(newUser);
-                                                localStorage.setItem("user", JSON.stringify(newUser));
-                                                addToast("Profile picture removed successfully", "success");
-                                                window.dispatchEvent(new Event("storage"));
+                                                localStorage.setItem(
+                                                    'user',
+                                                    JSON.stringify(newUser)
+                                                );
+                                                addToast(
+                                                    'Profile picture removed successfully',
+                                                    'success'
+                                                );
+                                                window.dispatchEvent(
+                                                    new Event('storage')
+                                                );
                                             } else {
-                                                throw new Error("Failed to update");
+                                                throw new Error(
+                                                    'Failed to update'
+                                                );
                                             }
                                         } catch (error) {
-                                            console.error("Delete error:", error);
-                                            addToast("Failed to remove picture", "error");
+                                            console.error(
+                                                'Delete error:',
+                                                error
+                                            );
+                                            addToast(
+                                                'Failed to remove picture',
+                                                'error'
+                                            );
                                         }
                                     }}
                                     className="absolute top-0 right-0 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all shadow-lg opacity-0 group-hover:opacity-100 transform -translate-y-1 translate-x-1 group-hover:translate-y-0 group-hover:translate-x-0 duration-200 hover:scale-110"
@@ -150,11 +226,17 @@ export default function StudentProfilePage() {
                             />
                         </div>
 
-                        <CardTitle className="vibe-text-platinum text-xl">{user.name || "Student"}</CardTitle>
+                        <CardTitle className="vibe-text-platinum text-xl">
+                            {user.name || 'Student'}
+                        </CardTitle>
                         <CardDescription>Enrolled Student</CardDescription>
                         <div className="flex justify-center mt-2">
-                            <Badge variant="outline" className="bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100">
-                                <GraduationCap className="w-3 h-3 mr-1" /> Student
+                            <Badge
+                                variant="outline"
+                                className="bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100"
+                            >
+                                <GraduationCap className="w-3 h-3 mr-1" />{' '}
+                                Student
                             </Badge>
                         </div>
                     </CardHeader>
@@ -164,14 +246,20 @@ export default function StudentProfilePage() {
                 <Card className="glass-card border-sky-300/30 shadow-sky-500/10">
                     <CardHeader>
                         <CardTitle>Academic Information</CardTitle>
-                        <CardDescription>Your personal and enrollment details.</CardDescription>
+                        <CardDescription>
+                            Your personal and enrollment details.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid gap-2">
                             <Label>Full Name</Label>
                             <div className="relative">
                                 <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input value={user.name || ""} disabled className="pl-9 bg-muted/50" />
+                                <Input
+                                    value={user.name || ''}
+                                    disabled
+                                    className="pl-9 bg-muted/50"
+                                />
                             </div>
                         </div>
 
@@ -179,7 +267,11 @@ export default function StudentProfilePage() {
                             <Label>Email Address</Label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input value={user.email || ""} disabled className="pl-9 bg-muted/50" />
+                                <Input
+                                    value={user.email || ''}
+                                    disabled
+                                    className="pl-9 bg-muted/50"
+                                />
                             </div>
                         </div>
 
@@ -187,7 +279,14 @@ export default function StudentProfilePage() {
                             <Label>Department</Label>
                             <div className="relative">
                                 <Building2 className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input value={user.department?.name || "Computer Science"} disabled className="pl-9 bg-muted/50" />
+                                <Input
+                                    value={
+                                        user.department?.name ||
+                                        'Computer Science'
+                                    }
+                                    disabled
+                                    className="pl-9 bg-muted/50"
+                                />
                             </div>
                         </div>
 
@@ -195,7 +294,11 @@ export default function StudentProfilePage() {
                             <Label>Program</Label>
                             <div className="relative">
                                 <BookOpen className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input value="B.Sc. Engineering" disabled className="pl-9 bg-muted/50" />
+                                <Input
+                                    value="B.Sc. Engineering"
+                                    disabled
+                                    className="pl-9 bg-muted/50"
+                                />
                             </div>
                         </div>
 
@@ -203,13 +306,18 @@ export default function StudentProfilePage() {
                             <Label>Current Semester</Label>
                             <div className="relative">
                                 <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input value="Spring 2024" disabled className="pl-9 bg-muted/50 text-green-600 font-medium" />
+                                <Input
+                                    value="Spring 2024"
+                                    disabled
+                                    className="pl-9 bg-muted/50 text-green-600 font-medium"
+                                />
                             </div>
                         </div>
 
                         <div className="pt-4 border-t">
                             <p className="text-xs text-muted-foreground text-center">
-                                To request changes to your profile, please contact the Registrar's office.
+                                To request changes to your profile, please
+                                contact the Registrar&apos;s office.
                             </p>
                         </div>
                     </CardContent>

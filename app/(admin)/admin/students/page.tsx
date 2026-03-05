@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
     Table,
@@ -19,7 +19,6 @@ import {
     Edit,
     Trash2,
     Loader2,
-    Upload,
     FileSpreadsheet,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -34,6 +33,15 @@ interface Student {
     batch: string;
     section: string;
     departmentId: number;
+}
+
+interface StudentData {
+    name: string;
+    email: string;
+    studentId: string;
+    batch: string;
+    section: string;
+    departmentId: string | number;
 }
 
 interface Department {
@@ -53,7 +61,10 @@ export default function StudentsPage() {
     const { addToast } = useToast();
 
     useEffect(() => {
-        fetchData();
+        const loadData = async () => {
+            await fetchData();
+        };
+        loadData();
     }, []);
 
     const fetchData = async () => {
@@ -71,8 +82,8 @@ export default function StudentsPage() {
                 const data = await deptsRes.json();
                 setDepartments(data);
             }
-        } catch (error) {
-            console.error(error);
+        } catch (err) {
+            console.error(err);
             addToast('Failed to fetch data', 'error');
         } finally {
             setLoading(false);
@@ -86,7 +97,7 @@ export default function StudentsPage() {
                 .toLowerCase()
                 .includes(searchTerm.toLowerCase()) ||
             student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (student.batch && student.batch.toString().includes(searchTerm))
+            (student.batch && student.batch.toString().includes(searchTerm)),
     );
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -120,11 +131,12 @@ export default function StudentsPage() {
 
             addToast(
                 editingStudent ? 'Student updated' : 'Student added',
-                'success'
+                'success',
             );
             fetchData();
             setIsModalOpen(false);
-        } catch (error) {
+        } catch (err) {
+            console.error(err);
             addToast('Failed to save student', 'error');
         } finally {
             setSubmitting(false);
@@ -155,17 +167,29 @@ export default function StudentsPage() {
                 `Failed to delete: ${
                     error instanceof Error ? error.message : 'Unknown error'
                 }`,
-                'error'
+                'error',
             );
         }
     };
 
-    const handleImport = async (data: Student[]) => {
+    const handleImport = async (data: StudentData[]) => {
         try {
+            const normalizedData = data.map((student) => ({
+                name: student.name,
+                email: student.email,
+                studentId: student.studentId,
+                batch: student.batch,
+                section: student.section,
+                departmentId:
+                    typeof student.departmentId === 'string'
+                        ? parseInt(student.departmentId, 10)
+                        : student.departmentId,
+            }));
+
             const res = await fetch('/api/students/bulk', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ students: data }),
+                body: JSON.stringify({ students: normalizedData }),
             });
 
             const result = await res.json();
@@ -194,7 +218,7 @@ export default function StudentsPage() {
                 // Warning toast for partial success if any (though we usually fail on validation)
                 addToast(
                     `Warnings: ${result.errors.length} rows failed validation`,
-                    'warning'
+                    'warning',
                 );
             }
             fetchData();
@@ -303,7 +327,7 @@ export default function StudentsPage() {
                                                     size="icon"
                                                     onClick={() => {
                                                         setEditingStudent(
-                                                            student
+                                                            student,
                                                         );
                                                         setIsModalOpen(true);
                                                     }}

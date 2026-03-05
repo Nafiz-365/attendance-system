@@ -8,14 +8,11 @@ import {
     Edit,
     Trash2,
     Loader2,
-    Mail,
-    Phone,
-    Hash,
     BookOpen,
     FileSpreadsheet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
     Table,
@@ -59,7 +56,7 @@ export default function TeachersPage() {
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
     const [allocatingTeacher, setAllocatingTeacher] = useState<Teacher | null>(
-        null
+        null,
     );
     const [submitting, setSubmitting] = useState(false);
     const { addToast } = useToast();
@@ -67,7 +64,10 @@ export default function TeachersPage() {
     // ... (fetchData and filters remain same)
 
     useEffect(() => {
-        fetchData();
+        const loadData = async () => {
+            await fetchData();
+        };
+        loadData();
     }, []);
 
     const fetchData = async () => {
@@ -97,7 +97,7 @@ export default function TeachersPage() {
         (teacher) =>
             teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            teacher.employeeId.toLowerCase().includes(searchTerm.toLowerCase())
+            teacher.employeeId.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -136,7 +136,7 @@ export default function TeachersPage() {
 
             addToast(
                 editingTeacher ? 'Teacher updated' : 'Teacher added',
-                'success'
+                'success',
             );
             fetchData();
             setIsModalOpen(false);
@@ -149,12 +149,27 @@ export default function TeachersPage() {
         }
     };
 
-    const handleImport = async (data: any[]) => {
+    const handleImport = async (
+        data: Array<{
+            name: string;
+            employeeId: string;
+            email: string;
+            phone?: string;
+            departmentId?: string | undefined;
+        }>,
+    ) => {
         try {
+            const normalizedData = data.map((teacher) => ({
+                ...teacher,
+                departmentId:
+                    typeof teacher.departmentId === 'string'
+                        ? parseInt(teacher.departmentId)
+                        : teacher.departmentId,
+            }));
             const res = await fetch('/api/teachers/bulk', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ teachers: data }),
+                body: JSON.stringify({ teachers: normalizedData }),
             });
 
             const result = await res.json();
@@ -181,7 +196,7 @@ export default function TeachersPage() {
             if (result.errors && result.errors.length > 0) {
                 addToast(
                     `Warnings: ${result.errors.length} rows failed validation`,
-                    'warning'
+                    'warning',
                 );
             }
             fetchData();
@@ -306,7 +321,7 @@ export default function TeachersPage() {
                                                     className="h-8 gap-1"
                                                     onClick={() =>
                                                         setAllocatingTeacher(
-                                                            teacher
+                                                            teacher,
                                                         )
                                                     }
                                                 >
@@ -318,7 +333,7 @@ export default function TeachersPage() {
                                                     size="icon"
                                                     onClick={() => {
                                                         setEditingTeacher(
-                                                            teacher
+                                                            teacher,
                                                         );
                                                         setIsModalOpen(true);
                                                     }}

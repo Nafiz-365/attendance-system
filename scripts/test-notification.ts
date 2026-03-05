@@ -1,5 +1,5 @@
 
-/* eslint-disable */
+ 
 import { PrismaClient } from "@prisma/client";
 import { createNotification } from "../lib/notifications";
 

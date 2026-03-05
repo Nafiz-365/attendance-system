@@ -1,14 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Calendar, Clock, MapPin } from 'lucide-react';
+import { Plus, Trash2, Clock, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardTitle,
-    CardDescription,
-} from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -20,7 +15,6 @@ import { Select } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/toast';
-import { Badge } from '@/components/ui/badge';
 
 const DAYS = [
     'MONDAY',
@@ -167,7 +161,8 @@ export default function TimetablePage() {
             } else {
                 addToast('Failed to schedule class', 'error');
             }
-        } catch (error) {
+        } catch (err) {
+            console.error(err);
             addToast('An error occurred', 'error');
         }
     };
@@ -186,7 +181,8 @@ export default function TimetablePage() {
                 setRoutines(await routinesRes.json());
             }
             addToast('Removed', 'success');
-        } catch (e) {
+        } catch (err) {
+            console.error(err);
             addToast('Failed', 'error');
         }
     };

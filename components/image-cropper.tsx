@@ -1,53 +1,81 @@
-"use client"
+'use client';
 
-import React, { useState, useCallback } from 'react'
-import Cropper from 'react-easy-crop'
-import { Slider } from "./ui/slider"
-import { Button } from "./ui/button"
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
-import getCroppedImg from '../lib/cropImage'
-import { Loader2 } from 'lucide-react'
+import React, { useState, useCallback } from 'react';
+import Cropper from 'react-easy-crop';
+import { Slider } from './ui/slider';
+import { Button } from './ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from './ui/dialog';
+import getCroppedImg from '../lib/cropImage';
+import { Loader2 } from 'lucide-react';
 
-interface ImageCropperProps {
-    imageSrc: string | null
-    onCancel: () => void
-    onCropComplete: (croppedImageBlob: Blob) => void
-    open: boolean
+interface CroppedAreaPixels {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
 }
 
-export function ImageCropper({ imageSrc, onCancel, onCropComplete, open }: ImageCropperProps) {
-    const [crop, setCrop] = useState({ x: 0, y: 0 })
-    const [zoom, setZoom] = useState(1)
-    const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null)
-    const [loading, setLoading] = useState(false)
+interface ImageCropperProps {
+    imageSrc: string | null;
+    onCancel: () => void;
+    onCropComplete: (croppedImageBlob: Blob) => void;
+    open: boolean;
+}
+
+export function ImageCropper({
+    imageSrc,
+    onCancel,
+    onCropComplete,
+    open,
+}: ImageCropperProps) {
+    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [croppedAreaPixels, setCroppedAreaPixels] =
+        useState<CroppedAreaPixels | null>(null);
+    const [loading, setLoading] = useState(false);
 
     const onCropChange = (crop: { x: number; y: number }) => {
-        setCrop(crop)
-    }
+        setCrop(crop);
+    };
 
     const onZoomChange = (zoom: number) => {
-        setZoom(zoom)
-    }
+        setZoom(zoom);
+    };
 
-    const onCropCompleteCallback = useCallback((croppedArea: any, croppedAreaPixels: any) => {
-        setCroppedAreaPixels(croppedAreaPixels)
-    }, [])
+    const onCropCompleteCallback = useCallback(
+        (
+            croppedArea: CroppedAreaPixels,
+            croppedAreaPixels: CroppedAreaPixels,
+        ) => {
+            setCroppedAreaPixels(croppedAreaPixels);
+        },
+        [],
+    );
 
     const handleSave = async () => {
-        if (!imageSrc || !croppedAreaPixels) return
+        if (!imageSrc || !croppedAreaPixels) return;
 
-        setLoading(true)
+        setLoading(true);
         try {
-            const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels)
+            const croppedImage = await getCroppedImg(
+                imageSrc,
+                croppedAreaPixels,
+            );
             if (croppedImage) {
-                onCropComplete(croppedImage)
+                onCropComplete(croppedImage);
             }
         } catch (e) {
-            console.error(e)
+            console.error(e);
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     if (!imageSrc) return null;
 
@@ -82,15 +110,21 @@ export function ImageCropper({ imageSrc, onCancel, onCropComplete, open }: Image
                     </div>
                 </div>
                 <DialogFooter className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={onCancel} disabled={loading}>
+                    <Button
+                        variant="outline"
+                        onClick={onCancel}
+                        disabled={loading}
+                    >
                         Cancel
                     </Button>
                     <Button onClick={handleSave} disabled={loading}>
-                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {loading && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
                         Save Photo
                     </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-    )
+    );
 }

@@ -1,13 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
@@ -21,7 +15,6 @@ import {
     Calendar,
     FileText,
     Search,
-    Filter,
 } from 'lucide-react';
 import {
     Table,
@@ -79,8 +72,8 @@ export default function AdminLeavesPage() {
                 const data = await res.json();
                 setLeaves(data);
             }
-        } catch (error) {
-            console.error('Failed to fetch leaves', error);
+        } catch (err) {
+            console.error('Failed to fetch leaves', err);
         } finally {
             setLoading(false);
         }
@@ -106,7 +99,8 @@ export default function AdminLeavesPage() {
 
             addToast(`Leave ${status.toLowerCase()} successfully`, 'success');
             fetchLeaves();
-        } catch (error) {
+        } catch (err) {
+            console.error(err);
             addToast('Something went wrong', 'error');
         } finally {
             setUpdatingId(null);

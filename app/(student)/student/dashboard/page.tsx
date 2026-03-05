@@ -1,46 +1,95 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2, Calendar, UserCheck, UserX, Clock, RefreshCw, Bell } from "lucide-react";
-import { useToast } from "@/components/ui/toast";
+import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+    Calendar,
+    UserCheck,
+    UserX,
+    Clock,
+    RefreshCw,
+    Bell,
+} from 'lucide-react';
+import { useToast } from '@/components/ui/toast';
+
+interface AttendanceRecord {
+    id: string;
+    date: string;
+    status: 'Present' | 'Absent' | 'Late';
+    allocation?: {
+        course?: { code: string };
+        teacher?: { name: string };
+    };
+}
+
+interface DashboardData {
+    studentName: string;
+    batch: string;
+    section: string;
+    studentId: string;
+    stats: {
+        attendanceRate: number;
+        totalClasses: number;
+        presentCount: number;
+        absentCount: number;
+        lateCount: number;
+    };
+    recentActivity: AttendanceRecord[];
+}
 
 export default function StudentDashboard() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-    const [data, setData] = useState<any>(null);
-    const [error, setError] = useState<string>("");
-    const [notices, setNotices] = useState<any[]>([]);
+    const [data, setData] = useState<DashboardData | null>(null);
+    const [error, setError] = useState<string>('');
+    const [notices, setNotices] = useState<
+        Array<{
+            id: string;
+            title: string;
+            content: string;
+            audience: string;
+            createdAt: string;
+        }>
+    >([]);
     const { addToast } = useToast();
 
-    const fetchStats = useCallback(async (isRefresh = false) => {
-        if (isRefresh) {
-            setRefreshing(true);
-            setError("");
-        }
-        try {
-            const res = await fetch('/api/student/stats');
-            const data = await res.json();
-
-            if (res.ok) {
-                setData(data);
-                if (isRefresh) addToast("Dashboard updated", "success");
-            } else {
-                setError(data.error || "Failed to load");
-                // addToast("Failed to load dashboard data", "error"); // Reduce noise
+    const fetchStats = useCallback(
+        async (isRefresh = false) => {
+            if (isRefresh) {
+                setRefreshing(true);
+                setError('');
             }
-        } catch (error) {
-            console.error(error);
-            setError("Network error");
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
-    }, [addToast]);
+            try {
+                const res = await fetch('/api/student/stats');
+                const data = await res.json();
+
+                if (res.ok) {
+                    setData(data);
+                    if (isRefresh) addToast('Dashboard updated', 'success');
+                } else {
+                    setError(data.error || 'Failed to load');
+                    // addToast("Failed to load dashboard data", "error"); // Reduce noise
+                }
+            } catch (error) {
+                console.error(error);
+                setError('Network error');
+            } finally {
+                setLoading(false);
+                setRefreshing(false);
+            }
+        },
+        [addToast]
+    );
 
     useEffect(() => {
         setTimeout(() => fetchStats(), 800);
@@ -52,8 +101,9 @@ export default function StudentDashboard() {
                 if (res.ok) {
                     const allNotices = await res.json();
                     // Filter for students only
-                    const studentNotices = allNotices.filter((n: any) =>
-                        n.audience === 'ALL' || n.audience === 'STUDENTS'
+                    const studentNotices = allNotices.filter(
+                        (n: { audience: string }) =>
+                            n.audience === 'ALL' || n.audience === 'STUDENTS'
                     );
                     setNotices(studentNotices.slice(0, 3)); // Show latest 3
                 }
@@ -66,17 +116,22 @@ export default function StudentDashboard() {
 
     if (loading) return <DashboardSkeleton />;
 
-    if (error) return (
-        <div className="flex flex-col items-center justify-center p-8 text-center h-[50vh] space-y-4">
-            <div className="text-destructive font-bold text-lg">Error Loading Dashboard</div>
-            <div className="text-muted-foreground">{error}</div>
-            <p className="text-sm text-muted">Ensure you are logged in with a Student account.</p>
-            <Button onClick={() => fetchStats(true)} variant="outline">
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Retry
-            </Button>
-        </div>
-    );
+    if (error)
+        return (
+            <div className="flex flex-col items-center justify-center p-8 text-center h-[50vh] space-y-4">
+                <div className="text-destructive font-bold text-lg">
+                    Error Loading Dashboard
+                </div>
+                <div className="text-muted-foreground">{error}</div>
+                <p className="text-sm text-muted">
+                    Ensure you are logged in with a Student account.
+                </p>
+                <Button onClick={() => fetchStats(true)} variant="outline">
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Retry
+                </Button>
+            </div>
+        );
 
     if (!data) return null;
 
@@ -84,8 +139,13 @@ export default function StudentDashboard() {
         <div className="space-y-6 animate-fade-in p-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight">Welcome, {data.studentName}</h2>
-                    <p className="text-muted-foreground">Batch {data.batch} | Section {data.section} | Student ID: {data.studentId}</p>
+                    <h2 className="text-3xl font-bold tracking-tight">
+                        Welcome, {data.studentName}
+                    </h2>
+                    <p className="text-muted-foreground">
+                        Batch {data.batch} | Section {data.section} | Student
+                        ID: {data.studentId}
+                    </p>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button
@@ -95,9 +155,20 @@ export default function StudentDashboard() {
                         disabled={refreshing}
                         title="Refresh Data"
                     >
-                        <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                        <RefreshCw
+                            className={`h-4 w-4 ${
+                                refreshing ? 'animate-spin' : ''
+                            }`}
+                        />
                     </Button>
-                    <Badge variant={data.stats.attendanceRate >= 75 ? "default" : "destructive"} className="text-lg px-3 py-1">
+                    <Badge
+                        variant={
+                            data.stats.attendanceRate >= 75
+                                ? 'default'
+                                : 'destructive'
+                        }
+                        className="text-lg px-3 py-1"
+                    >
                         {data.stats.attendanceRate}% Attendance
                     </Badge>
                 </div>
@@ -106,42 +177,66 @@ export default function StudentDashboard() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="hover-lift glass">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Classes</CardTitle>
+                        <CardTitle className="text-sm font-medium">
+                            Total Classes
+                        </CardTitle>
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{data.stats.totalClasses}</div>
-                        <p className="text-xs text-muted-foreground">Days of operation</p>
+                        <div className="text-2xl font-bold">
+                            {data.stats.totalClasses}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            Days of operation
+                        </p>
                     </CardContent>
                 </Card>
                 <Card className="hover-lift glass">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Present</CardTitle>
+                        <CardTitle className="text-sm font-medium">
+                            Present
+                        </CardTitle>
                         <UserCheck className="h-4 w-4 text-green-600" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{data.stats.presentCount}</div>
-                        <p className="text-xs text-muted-foreground">Days attended</p>
+                        <div className="text-2xl font-bold">
+                            {data.stats.presentCount}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            Days attended
+                        </p>
                     </CardContent>
                 </Card>
                 <Card className="hover-lift glass">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Absent</CardTitle>
+                        <CardTitle className="text-sm font-medium">
+                            Absent
+                        </CardTitle>
                         <UserX className="h-4 w-4 text-red-600" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{data.stats.absentCount}</div>
-                        <p className="text-xs text-muted-foreground">Days missed</p>
+                        <div className="text-2xl font-bold">
+                            {data.stats.absentCount}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            Days missed
+                        </p>
                     </CardContent>
                 </Card>
                 <Card className="hover-lift glass">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Late</CardTitle>
+                        <CardTitle className="text-sm font-medium">
+                            Late
+                        </CardTitle>
                         <Clock className="h-4 w-4 text-yellow-600" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{data.stats.lateCount}</div>
-                        <p className="text-xs text-muted-foreground">Days late</p>
+                        <div className="text-2xl font-bold">
+                            {data.stats.lateCount}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            Days late
+                        </p>
                     </CardContent>
                 </Card>
             </div>
@@ -152,18 +247,28 @@ export default function StudentDashboard() {
                         <CardTitle>Quick Actions</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                        <Link href="/student/leaves" className="w-full p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex items-center gap-3">
+                        <Link
+                            href="/student/leaves"
+                            className="w-full p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex items-center gap-3"
+                        >
                             <Calendar className="h-5 w-5 text-blue-600" />
                             <div>
                                 <p className="font-medium">Apply for Leave</p>
-                                <p className="text-sm text-muted-foreground">Request time off</p>
+                                <p className="text-sm text-muted-foreground">
+                                    Request time off
+                                </p>
                             </div>
                         </Link>
-                        <Link href="/student/attendance" className="w-full p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex items-center gap-3">
+                        <Link
+                            href="/student/attendance"
+                            className="w-full p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex items-center gap-3"
+                        >
                             <UserCheck className="h-5 w-5 text-green-600" />
                             <div>
                                 <p className="font-medium">Check Attendance</p>
-                                <p className="text-sm text-muted-foreground">View your records</p>
+                                <p className="text-sm text-muted-foreground">
+                                    View your records
+                                </p>
                             </div>
                         </Link>
                     </CardContent>
@@ -172,28 +277,59 @@ export default function StudentDashboard() {
                 <Card className="col-span-4 hover-lift glass">
                     <CardHeader>
                         <CardTitle>Recent Attendance History</CardTitle>
-                        <CardDescription>Your last 5 attendance records.</CardDescription>
+                        <CardDescription>
+                            Your last 5 attendance records.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            {data.recentActivity.map((record: any) => (
-                                <div key={record.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                                    <div>
-                                        <p className="font-medium text-sm">
-                                            {record.allocation?.course?.code || "Class Activity"} - {new Date(record.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                            Marked by {record.allocation?.teacher?.name || "Teacher"} at {new Date(record.date).toLocaleTimeString()}
-                                        </p>
+                            {data.recentActivity.map(
+                                (record: AttendanceRecord) => (
+                                    <div
+                                        key={record.id}
+                                        className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
+                                    >
+                                        <div>
+                                            <p className="font-medium text-sm">
+                                                {record.allocation?.course
+                                                    ?.code ||
+                                                    'Class Activity'}{' '}
+                                                -{' '}
+                                                {new Date(
+                                                    record.date
+                                                ).toLocaleDateString(
+                                                    undefined,
+                                                    {
+                                                        weekday: 'short',
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                    }
+                                                )}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                Marked by{' '}
+                                                {record.allocation?.teacher
+                                                    ?.name || 'Teacher'}{' '}
+                                                at{' '}
+                                                {new Date(
+                                                    record.date
+                                                ).toLocaleTimeString()}
+                                            </p>
+                                        </div>
+                                        <Badge
+                                            variant={
+                                                record.status === 'Present'
+                                                    ? 'default'
+                                                    : record.status === 'Absent'
+                                                    ? 'destructive'
+                                                    : 'secondary'
+                                            }
+                                        >
+                                            {record.status}
+                                        </Badge>
                                     </div>
-                                    <Badge variant={
-                                        record.status === 'Present' ? 'default' :
-                                            record.status === 'Absent' ? 'destructive' : 'secondary'
-                                    }>
-                                        {record.status}
-                                    </Badge>
-                                </div>
-                            ))}
+                                )
+                            )}
                         </div>
                     </CardContent>
                 </Card>
@@ -204,16 +340,26 @@ export default function StudentDashboard() {
                             <Bell className="h-5 w-5 text-blue-500" />
                             Announcements
                         </CardTitle>
-                        <CardDescription>Recent notices from administration</CardDescription>
+                        <CardDescription>
+                            Recent notices from administration
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-3">
                             {notices.length > 0 ? (
                                 notices.map((notice) => (
-                                    <div key={notice.id} className="p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                                    <div
+                                        key={notice.id}
+                                        className="p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                                    >
                                         <div className="flex items-start justify-between gap-2">
-                                            <h4 className="font-semibold text-sm">{notice.title}</h4>
-                                            <Badge variant="secondary" className="text-[10px] shrink-0">
+                                            <h4 className="font-semibold text-sm">
+                                                {notice.title}
+                                            </h4>
+                                            <Badge
+                                                variant="secondary"
+                                                className="text-[10px] shrink-0"
+                                            >
                                                 {notice.audience}
                                             </Badge>
                                         </div>
@@ -221,7 +367,9 @@ export default function StudentDashboard() {
                                             {notice.content}
                                         </p>
                                         <p className="text-[10px] text-muted-foreground/60 mt-1">
-                                            {new Date(notice.createdAt).toLocaleDateString()}
+                                            {new Date(
+                                                notice.createdAt
+                                            ).toLocaleDateString()}
                                         </p>
                                     </div>
                                 ))
@@ -283,7 +431,10 @@ function DashboardSkeleton() {
                     <CardContent>
                         <div className="space-y-4">
                             {[...Array(5)].map((_, i) => (
-                                <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                                <div
+                                    key={i}
+                                    className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
+                                >
                                     <div className="space-y-1">
                                         <Skeleton className="h-4 w-48" />
                                         <Skeleton className="h-3 w-32" />

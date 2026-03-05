@@ -2,13 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
     Table,
@@ -95,7 +89,8 @@ export default function CoursesPage() {
             setIsModalOpen(false);
             setEditingCourse(null);
             form.reset();
-        } catch (error) {
+        } catch (err) {
+            console.error(err);
             // Error handled by hook
         } finally {
             setSubmitting(false);
@@ -107,15 +102,23 @@ export default function CoursesPage() {
             name: string;
             code: string;
             credits: number;
-            departmentId: number;
+            departmentId: string | number;
             instructor: string;
-        }>
+        }>,
     ) => {
         try {
+            const coursesData = data.map((course) => ({
+                ...course,
+                departmentId:
+                    typeof course.departmentId === 'string'
+                        ? parseInt(course.departmentId)
+                        : course.departmentId,
+            }));
+
             const res = await fetch('/api/courses/bulk', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ courses: data }),
+                body: JSON.stringify({ courses: coursesData }),
             });
 
             const result = await res.json();
@@ -142,14 +145,14 @@ export default function CoursesPage() {
             if (result.errors && result.errors.length > 0) {
                 addToast(
                     `Warnings: ${result.errors.length} rows failed validation`,
-                    'warning'
+                    'warning',
                 );
             }
             if (refresh) await refresh();
             else window.location.reload();
-        } catch (error: unknown) {
-            console.error('Import error details:', error);
-            throw error;
+        } catch (err: unknown) {
+            console.error('Import error details:', err);
+            throw err;
         }
     };
 
@@ -172,7 +175,7 @@ export default function CoursesPage() {
 
     const totalCredits = courses.reduce(
         (sum, course) => sum + course.credits,
-        0
+        0,
     );
 
     return (
@@ -337,7 +340,7 @@ export default function CoursesPage() {
                             ) : filteredCourses.length > 0 ? (
                                 filteredCourses.map((course) => {
                                     const department = departments.find(
-                                        (d) => d.id === course.departmentId
+                                        (d) => d.id === course.departmentId,
                                     );
                                     return (
                                         <TableRow
@@ -371,7 +374,7 @@ export default function CoursesPage() {
                                                         className="hover:bg-primary/10"
                                                         onClick={() =>
                                                             handleEditClick(
-                                                                course
+                                                                course,
                                                             )
                                                         }
                                                     >
@@ -383,7 +386,7 @@ export default function CoursesPage() {
                                                         className="text-destructive hover:bg-destructive/10"
                                                         onClick={() =>
                                                             deleteCourse(
-                                                                course.id
+                                                                course.id,
                                                             )
                                                         }
                                                     >

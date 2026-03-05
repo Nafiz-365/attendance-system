@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 const JWT_SECRET = process.env.JWT_SECRET || "super-secret-key-change-this";
 
 async function getUserFromToken() {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get("token");
 
     if (!token) return null;

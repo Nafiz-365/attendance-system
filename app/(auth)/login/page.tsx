@@ -1,21 +1,28 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card";
-import { Select } from "@/components/ui/select";
-import { useToast } from "@/components/ui/toast";
-import { Eye, EyeOff, Loader2, GraduationCap, ArrowRight, Lock, Mail, User } from "lucide-react";
-import { motion } from "framer-motion";
+} from '@/components/ui/card';
+import { useToast } from '@/components/ui/toast';
+import {
+    Eye,
+    EyeOff,
+    Loader2,
+    GraduationCap,
+    ArrowRight,
+    Lock,
+    Mail,
+} from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -24,8 +31,8 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [formData, setFormData] = useState({
-        email: "",
-        password: "",
+        email: '',
+        password: '',
     });
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -33,15 +40,15 @@ export default function LoginPage() {
         setLoading(true);
 
         if (!formData.email || !formData.password) {
-            addToast("Please fill in all fields", "error");
+            addToast('Please fill in all fields', 'error');
             setLoading(false);
             return;
         }
 
         try {
-            const res = await fetch("/api/auth/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: formData.email,
                     password: formData.password,
@@ -51,29 +58,31 @@ export default function LoginPage() {
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.error || "Login failed");
+                throw new Error(data.error || 'Login failed');
             }
 
-            localStorage.setItem("user", JSON.stringify(data.user));
-            addToast(`Welcome back, ${data.user.name}!`, "success");
+            localStorage.setItem('user', JSON.stringify(data.user));
+            addToast(`Welcome back, ${data.user.name}!`, 'success');
 
             switch (data.user.role) {
                 case 'STUDENT':
-                    router.push("/student/dashboard");
+                    router.push('/student/dashboard');
                     break;
                 case 'TEACHER':
-                    router.push("/teacher/dashboard");
+                    router.push('/teacher/dashboard');
                     break;
                 case 'ADMIN':
-                    router.push("/admin/dashboard");
+                    router.push('/admin/dashboard');
                     break;
                 default:
-                    router.push("/dashboard");
+                    router.push('/dashboard');
             }
 
             router.refresh();
-        } catch (error: any) {
-            addToast(error.message, "error");
+        } catch (error: Error | unknown) {
+            const message =
+                error instanceof Error ? error.message : 'An error occurred';
+            addToast(message, 'error');
         } finally {
             setLoading(false);
         }
@@ -95,7 +104,7 @@ export default function LoginPage() {
                 <motion.div
                     initial={{ scale: 0.5, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                     className="mx-auto w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg transform group-hover:scale-105 transition-transform duration-500"
                 >
                     <GraduationCap className="text-white w-5 h-5" />
@@ -113,7 +122,9 @@ export default function LoginPage() {
             <CardContent className="relative z-10 p-5 pt-0">
                 <form onSubmit={handleLogin} className="space-y-3">
                     <div className="space-y-1">
-                        <label className="text-[11px] font-medium ml-1 text-muted-foreground uppercase tracking-wider">Email Address</label>
+                        <label className="text-[11px] font-medium ml-1 text-muted-foreground uppercase tracking-wider">
+                            Email Address
+                        </label>
                         <div className="relative group/input">
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground group-focus-within/input:text-primary transition-colors" />
                             <Input
@@ -130,12 +141,14 @@ export default function LoginPage() {
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-[11px] font-medium ml-1 text-muted-foreground uppercase tracking-wider">Password</label>
+                        <label className="text-[11px] font-medium ml-1 text-muted-foreground uppercase tracking-wider">
+                            Password
+                        </label>
                         <div className="relative group/input">
                             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground group-focus-within/input:text-primary transition-colors" />
                             <Input
                                 name="password"
-                                type={showPassword ? "text" : "password"}
+                                type={showPassword ? 'text' : 'password'}
                                 placeholder="Enter your password"
                                 value={formData.password}
                                 onChange={handleInputChange}
@@ -166,7 +179,9 @@ export default function LoginPage() {
                                 type="checkbox"
                                 id="rememberMe"
                                 checked={rememberMe}
-                                onChange={(e) => setRememberMe(e.target.checked)}
+                                onChange={(e) =>
+                                    setRememberMe(e.target.checked)
+                                }
                                 className="h-3.5 w-3.5 rounded border-gray-300 text-primary focus:ring-primary"
                                 disabled={loading}
                             />

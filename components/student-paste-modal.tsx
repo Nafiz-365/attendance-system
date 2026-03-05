@@ -1,27 +1,36 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Modal } from "@/components/ui/modal";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2, AlertCircle, CheckCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useState } from 'react';
+import { Modal } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+interface Student {
+    studentId: string;
+    name: string;
+    email: string;
+    batch: string;
+    section: string;
+    departmentId: number;
+}
 
 interface PasteModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onImport: (data: any[]) => Promise<void>;
+    onImport: (data: Student[]) => Promise<void>;
 }
 
 export function PasteModal({ isOpen, onClose, onImport }: PasteModalProps) {
-    const [text, setText] = useState("");
-    const [preview, setPreview] = useState<any[]>([]);
-    const [error, setError] = useState("");
+    const [text, setText] = useState('');
+    const [preview, setPreview] = useState<Student[]>([]);
+    const [error, setError] = useState('');
     const [importing, setImporting] = useState(false);
 
     const handleTextChange = (value: string) => {
         setText(value);
-        setError("");
+        setError('');
 
         const lines = value.trim().split('\n');
         const students = [];
@@ -31,13 +40,17 @@ export function PasteModal({ isOpen, onClose, onImport }: PasteModalProps) {
             if (!line) continue;
 
             // Skip header if present
-            if (i === 0 && (line.toLowerCase().includes('id') || line.toLowerCase().includes('name'))) {
+            if (
+                i === 0 &&
+                (line.toLowerCase().includes('id') ||
+                    line.toLowerCase().includes('name'))
+            ) {
                 continue;
             }
 
             const values = line.includes('\t')
-                ? line.split('\t').map(v => v.trim())
-                : line.split(',').map(v => v.trim());
+                ? line.split('\t').map((v) => v.trim())
+                : line.split(',').map((v) => v.trim());
 
             // Format: StudentId, Name, Email, Batch, Section, DepartmentId
             if (values.length >= 5) {
@@ -47,7 +60,7 @@ export function PasteModal({ isOpen, onClose, onImport }: PasteModalProps) {
                     email: values[2],
                     batch: values[3],
                     section: values[4],
-                    departmentId: values[5] ? parseInt(values[5]) : 1
+                    departmentId: values[5] ? parseInt(values[5]) : 1,
                 });
             }
         }
@@ -56,34 +69,41 @@ export function PasteModal({ isOpen, onClose, onImport }: PasteModalProps) {
 
     const handleImport = async () => {
         if (preview.length === 0) {
-            setError("No valid data found to import");
+            setError('No valid data found to import');
             return;
         }
 
         try {
             setImporting(true);
             await onImport(preview);
-            setText("");
+            setText('');
             setPreview([]);
             onClose();
-        } catch (err: any) {
-            setError(err.message || "Failed to import students");
+        } catch (err: unknown) {
+            const message =
+                err instanceof Error
+                    ? err.message
+                    : 'Failed to import students';
+            setError(message);
         } finally {
             setImporting(false);
         }
     };
 
     return (
-        <Modal
-            isOpen={isOpen}
-            onClose={onClose}
-            title="Import Students"
-        >
+        <Modal isOpen={isOpen} onClose={onClose} title="Import Students">
             <div className="space-y-4">
                 <div className="bg-muted/50 p-3 rounded-md text-sm">
                     <p className="font-semibold mb-1">Format Required:</p>
-                    <p className="text-muted-foreground">StudentId, Name, Email, Batch, Section, DepartmentId</p>
-                    <p className="text-xs text-muted-foreground mt-1">Example: <code className="bg-muted px-1">S101, John Doe, john@email.com, 50, A, 1</code></p>
+                    <p className="text-muted-foreground">
+                        StudentId, Name, Email, Batch, Section, DepartmentId
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                        Example:{' '}
+                        <code className="bg-muted px-1">
+                            S101, John Doe, john@email.com, 50, A, 1
+                        </code>
+                    </p>
                 </div>
 
                 <div className="grid gap-2">
@@ -103,9 +123,14 @@ export function PasteModal({ isOpen, onClose, onImport }: PasteModalProps) {
                         </p>
                         <div className="mt-2 text-xs text-muted-foreground max-h-24 overflow-y-auto border rounded p-2">
                             {preview.slice(0, 5).map((s, i) => (
-                                <div key={i}>{s.studentId} - {s.name} (Batch {s.batch} | Sec {s.section})</div>
+                                <div key={i}>
+                                    {s.studentId} - {s.name} (Batch {s.batch} |
+                                    Sec {s.section})
+                                </div>
                             ))}
-                            {preview.length > 5 && <div>...and {preview.length - 5} more</div>}
+                            {preview.length > 5 && (
+                                <div>...and {preview.length - 5} more</div>
+                            )}
                         </div>
                     </div>
                 )}
@@ -120,9 +145,20 @@ export function PasteModal({ isOpen, onClose, onImport }: PasteModalProps) {
             </div>
 
             <div className="flex justify-end gap-2 mt-6">
-                <Button variant="outline" onClick={onClose} disabled={importing}>Cancel</Button>
-                <Button onClick={handleImport} disabled={preview.length === 0 || importing}>
-                    {importing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                <Button
+                    variant="outline"
+                    onClick={onClose}
+                    disabled={importing}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    onClick={handleImport}
+                    disabled={preview.length === 0 || importing}
+                >
+                    {importing ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : null}
                     Import {preview.length} Students
                 </Button>
             </div>

@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { format } from 'date-fns';
 
 interface DashboardStats {
     totalStudents: number;
@@ -66,8 +65,8 @@ export default function DashboardPage() {
                     const data = await res.json();
                     setStats(data);
                 }
-            } catch (error) {
-                console.error('Failed to fetch dashboard stats', error);
+            } catch (err) {
+                console.error('Failed to fetch dashboard stats', err);
             } finally {
                 setLoading(false);
             }

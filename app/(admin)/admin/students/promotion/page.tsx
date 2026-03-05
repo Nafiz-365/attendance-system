@@ -18,7 +18,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Loader2, ArrowRight, CheckCircle, Search, Filter } from 'lucide-react';
+import { Loader2, ArrowRight, Filter } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 import { Badge } from '@/components/ui/badge';
 

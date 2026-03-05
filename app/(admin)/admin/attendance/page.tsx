@@ -12,10 +12,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Loader2, Calendar as CalendarIcon, Save, Filter } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Loader2, Save, Filter } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
-import { format } from 'date-fns';
 
 interface Student {
     id: number;
@@ -31,11 +29,8 @@ interface Department {
 export default function AttendancePage() {
     const [students, setStudents] = useState<Student[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
-    const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const { addToast } = useToast();
-
-    // Filters
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [selectedDept, setSelectedDept] = useState('');
     const [batch, setBatch] = useState('50');
@@ -43,6 +38,7 @@ export default function AttendancePage() {
 
     // Attendance State
     const [attendance, setAttendance] = useState<Record<number, string>>({});
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         fetchDepartments();
@@ -164,7 +160,8 @@ export default function AttendancePage() {
             if (!res.ok) throw new Error('Failed to save');
 
             addToast('Attendance saved successfully', 'success');
-        } catch (error) {
+        } catch (err) {
+            console.error(err);
             addToast('Failed to save attendance', 'error');
         } finally {
             setSubmitting(false);

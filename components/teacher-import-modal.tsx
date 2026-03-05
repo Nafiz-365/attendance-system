@@ -1,25 +1,63 @@
+'use client';
 
-"use client";
+import { useState, useRef } from 'react';
+import * as XLSX from 'xlsx';
+import { Modal } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
+import {
+    Loader2,
+    Upload,
+    FileSpreadsheet,
+    X,
+    Download,
+    AlertCircle,
+    CheckCircle,
+} from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import { cn } from '@/lib/utils';
 
-import { useState, useRef } from "react";
-import * as XLSX from "xlsx";
-import { Modal } from "@/components/ui/modal";
-import { Button } from "@/components/ui/button";
-import { Loader2, Upload, FileSpreadsheet, X, Download, AlertCircle, CheckCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
+interface TeacherData {
+    employeeId: string;
+    name: string;
+    email: string;
+    phone: string;
+    password?: string;
+    subjects?: string;
+    departmentCode?: string;
+    departmentId?: string;
+    designation?: string;
+    gender?: string;
+    qualification?: string;
+    joiningDate?: string;
+    address?: string;
+}
+
+interface ExcelRow {
+    [key: string]: string | number | undefined;
+}
 
 interface TeacherImportModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onImport: (data: any[]) => Promise<void>;
+    onImport: (data: TeacherData[]) => Promise<void>;
 }
 
-export function TeacherImportModal({ isOpen, onClose, onImport }: TeacherImportModalProps) {
+export function TeacherImportModal({
+    isOpen,
+    onClose,
+    onImport,
+}: TeacherImportModalProps) {
     const [file, setFile] = useState<File | null>(null);
-    const [preview, setPreview] = useState<any[]>([]);
-    const [error, setError] = useState("");
+    const [preview, setPreview] = useState<TeacherData[]>([]);
+    const [error, setError] = useState('');
     const [importing, setImporting] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -45,51 +83,75 @@ export function TeacherImportModal({ isOpen, onClose, onImport }: TeacherImportM
 
     const processFile = async (droppedFile: File) => {
         if (!droppedFile.name.match(/\.(xlsx|xls|csv)$/)) {
-            setError("Please upload a valid Excel or CSV file.");
+            setError('Please upload a valid Excel or CSV file.');
             return;
         }
 
         setFile(droppedFile);
-        setError("");
+        setError('');
 
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
                 const data = e.target?.result;
-                const workbook = XLSX.read(data, { type: "binary" });
+                const workbook = XLSX.read(data, { type: 'binary' });
                 const sheetName = workbook.SheetNames[0];
                 const sheet = workbook.Sheets[sheetName];
                 const jsonData = XLSX.utils.sheet_to_json(sheet);
 
                 // Validate and format data
-                const formattedData = jsonData.map((row: any) => ({
-                    employeeId: row['Employee ID'] || row['employeeId'] || row['ID'] || '',
-                    name: row['Name'] || row['name'] || '',
-                    email: row['Email'] || row['email'] || '',
-                    phone: String(row['Phone'] || row['phone'] || ''),
-                    password: String(row['Password'] || row['password'] || ''), // Optional custom password
-                    subjects: row['Subjects'] || row['subjects'] || '', // Optional
-                    // Support Department Code (preferred) or ID
-                    departmentCode: row['Department Code'] || row['Department'] || row['departmentCode'] || '',
-                    departmentId: row['Department ID'] || row['departmentId'] || '',
-                    designation: row['Designation'] || row['designation'] || '',
-                    gender: row['Gender'] || row['gender'] || '',
-                    qualification: row['Qualification'] || row['qualification'] || '',
-                    joiningDate: row['Joining Date'] || row['joiningDate'] || '',
-                    address: row['Address'] || row['address'] || ''
-                })).filter(s => s.employeeId && s.name && s.email);
+                const formattedData = (jsonData as ExcelRow[])
+                    .map((row: ExcelRow) => ({
+                        employeeId: String(
+                            row['Employee ID'] ||
+                                row['employeeId'] ||
+                                row['ID'] ||
+                                '',
+                        ),
+                        name: String(row['Name'] || row['name'] || ''),
+                        email: String(row['Email'] || row['email'] || ''),
+                        phone: String(row['Phone'] || row['phone'] || ''),
+                        password: String(
+                            row['Password'] || row['password'] || '',
+                        ), // Optional custom password
+                        subjects: String(
+                            row['Subjects'] || row['subjects'] || '',
+                        ), // Optional
+                        // Support Department Code (preferred) or ID
+                        departmentCode: String(
+                            row['Department Code'] ||
+                                row['Department'] ||
+                                row['departmentCode'] ||
+                                '',
+                        ),
+                        departmentId: String(
+                            row['Department ID'] || row['departmentId'] || '',
+                        ),
+                        designation: String(
+                            row['Designation'] || row['designation'] || '',
+                        ),
+                        gender: String(row['Gender'] || row['gender'] || ''),
+                        qualification: String(
+                            row['Qualification'] || row['qualification'] || '',
+                        ),
+                        joiningDate: String(
+                            row['Joining Date'] || row['joiningDate'] || '',
+                        ),
+                        address: String(row['Address'] || row['address'] || ''),
+                    }))
+                    .filter((s) => s.employeeId && s.name && s.email);
 
                 if (formattedData.length === 0) {
-                    setError("No valid teacher data found in the file.");
+                    setError('No valid teacher data found in the file.');
                 } else {
                     setPreview(formattedData);
                     if (jsonData.length > formattedData.length) {
                         // Optional: warning about skipped rows
                     }
                 }
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error(err);
-                setError("Failed to parse file. Please check the format.");
+                setError('Failed to parse file. Please check the format.');
             }
         };
         reader.readAsBinaryString(droppedFile);
@@ -103,8 +165,12 @@ export function TeacherImportModal({ isOpen, onClose, onImport }: TeacherImportM
             await onImport(preview);
             resetState();
             onClose();
-        } catch (err: any) {
-            setError(err.message || "Failed to import teachers");
+        } catch (err: unknown) {
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : 'Failed to import teachers',
+            );
         } finally {
             setImporting(false);
         }
@@ -113,33 +179,64 @@ export function TeacherImportModal({ isOpen, onClose, onImport }: TeacherImportM
     const resetState = () => {
         setFile(null);
         setPreview([]);
-        setError("");
-        if (fileInputRef.current) fileInputRef.current.value = "";
+        setError('');
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     const downloadTemplate = () => {
-        const headers = ["Employee ID", "Name", "Email", "Phone", "Password", "Department Code", "Designation", "Gender", "Qualification", "Joining Date", "Address", "Subjects"];
+        const headers = [
+            'Employee ID',
+            'Name',
+            'Email',
+            'Phone',
+            'Password',
+            'Department Code',
+            'Designation',
+            'Gender',
+            'Qualification',
+            'Joining Date',
+            'Address',
+            'Subjects',
+        ];
         const ws = XLSX.utils.aoa_to_sheet([
             headers,
-            ["T001", "Dr. Smith", "smith@univ.edu", "1234567890", "pass123", "CSE", "Assistant Professor", "Male", "PhD", "2024-01-01", "123 Main St", "CS101"]
+            [
+                'T001',
+                'Dr. Smith',
+                'smith@univ.edu',
+                '1234567890',
+                'pass123',
+                'CSE',
+                'Assistant Professor',
+                'Male',
+                'PhD',
+                '2024-01-01',
+                '123 Main St',
+                'CS101',
+            ],
         ]);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Template");
-        XLSX.writeFile(wb, "teacher_import_template.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, 'Template');
+        XLSX.writeFile(wb, 'teacher_import_template.xlsx');
     };
 
     return (
         <Modal
             isOpen={isOpen}
-            onClose={() => { onClose(); resetState(); }}
+            onClose={() => {
+                onClose();
+                resetState();
+            }}
             title="Import Teachers"
         >
             <div className="space-y-6">
                 {!file && (
                     <div
                         className={cn(
-                            "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
-                            isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"
+                            'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors',
+                            isDragging
+                                ? 'border-primary bg-primary/5'
+                                : 'border-muted-foreground/25 hover:border-primary/50',
                         )}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
@@ -151,15 +248,21 @@ export function TeacherImportModal({ isOpen, onClose, onImport }: TeacherImportM
                             className="hidden"
                             ref={fileInputRef}
                             accept=".xlsx,.xls,.csv"
-                            onChange={(e) => e.target.files && processFile(e.target.files[0])}
+                            onChange={(e) =>
+                                e.target.files && processFile(e.target.files[0])
+                            }
                         />
                         <div className="flex flex-col items-center gap-3 text-muted-foreground">
                             <div className="bg-muted p-4 rounded-full">
                                 <Upload className="w-8 h-8" />
                             </div>
                             <div>
-                                <p className="font-semibold text-foreground">Click to upload or drag and drop</p>
-                                <p className="text-sm">Excel (.xlsx) or CSV files</p>
+                                <p className="font-semibold text-foreground">
+                                    Click to upload or drag and drop
+                                </p>
+                                <p className="text-sm">
+                                    Excel (.xlsx) or CSV files
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -170,11 +273,19 @@ export function TeacherImportModal({ isOpen, onClose, onImport }: TeacherImportM
                         <div className="flex items-center gap-3">
                             <FileSpreadsheet className="w-8 h-8 text-green-600" />
                             <div>
-                                <p className="font-medium text-sm">{file.name}</p>
-                                <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
+                                <p className="font-medium text-sm">
+                                    {file.name}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    {(file.size / 1024).toFixed(1)} KB
+                                </p>
                             </div>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={resetState}>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={resetState}
+                        >
                             <X className="w-4 h-4" />
                         </Button>
                     </div>
@@ -195,7 +306,12 @@ export function TeacherImportModal({ isOpen, onClose, onImport }: TeacherImportM
                                 <CheckCircle className="w-4 h-4" />
                                 {preview.length} valid records found
                             </div>
-                            <Button variant="link" size="sm" className="h-auto p-0" onClick={resetState}>
+                            <Button
+                                variant="link"
+                                size="sm"
+                                className="h-auto p-0"
+                                onClick={resetState}
+                            >
                                 Replace File
                             </Button>
                         </div>
@@ -204,19 +320,32 @@ export function TeacherImportModal({ isOpen, onClose, onImport }: TeacherImportM
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="w-[100px]">ID</TableHead>
+                                        <TableHead className="w-[100px]">
+                                            ID
+                                        </TableHead>
                                         <TableHead>Name</TableHead>
                                         <TableHead>Email</TableHead>
-                                        <TableHead className="text-right">Dept</TableHead>
+                                        <TableHead className="text-right">
+                                            Dept
+                                        </TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {preview.slice(0, 10).map((row, i) => (
                                         <TableRow key={i}>
-                                            <TableCell className="font-mono text-xs">{row.employeeId}</TableCell>
-                                            <TableCell className="text-xs">{row.name}</TableCell>
-                                            <TableCell className="text-xs">{row.email}</TableCell>
-                                            <TableCell className="text-xs text-right">{row.departmentCode || row.departmentId}</TableCell>
+                                            <TableCell className="font-mono text-xs">
+                                                {row.employeeId}
+                                            </TableCell>
+                                            <TableCell className="text-xs">
+                                                {row.name}
+                                            </TableCell>
+                                            <TableCell className="text-xs">
+                                                {row.email}
+                                            </TableCell>
+                                            <TableCell className="text-xs text-right">
+                                                {row.departmentCode ||
+                                                    row.departmentId}
+                                            </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -231,14 +360,32 @@ export function TeacherImportModal({ isOpen, onClose, onImport }: TeacherImportM
                 )}
 
                 <div className="flex justify-between items-center pt-2">
-                    <Button variant="link" className="text-muted-foreground p-0 h-auto gap-1 text-xs" onClick={downloadTemplate}>
+                    <Button
+                        variant="link"
+                        className="text-muted-foreground p-0 h-auto gap-1 text-xs"
+                        onClick={downloadTemplate}
+                    >
                         <Download className="w-3 h-3" /> Download Template
                     </Button>
 
                     <div className="flex gap-2">
-                        <Button variant="outline" onClick={onClose} disabled={importing}>Cancel</Button>
-                        <Button onClick={handleImport} disabled={preview.length === 0 || importing} className="gradient-university text-white">
-                            {importing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
+                        <Button
+                            variant="outline"
+                            onClick={onClose}
+                            disabled={importing}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleImport}
+                            disabled={preview.length === 0 || importing}
+                            className="gradient-university text-white"
+                        >
+                            {importing ? (
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                            ) : (
+                                <Upload className="w-4 h-4 mr-2" />
+                            )}
                             Import Teachers
                         </Button>
                     </div>

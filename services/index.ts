@@ -1,8 +1,21 @@
-import { Student, Department, Course, AttendanceData, RecentActivity } from '@/types'
+import {
+    Student,
+    Department,
+    Course,
+    AttendanceData,
+    RecentActivity,
+} from '@/types';
 
 // Mock data used by other services (placeholder)
 export const DEPARTMENTS: Department[] = [
-    { id: 1, name: "Computer Science & Engineering", code: "CSE", hod: "Dr. Sarah Williams", totalStudents: 450, activeStudents: 420 },
+    {
+        id: 1,
+        name: 'Computer Science & Engineering',
+        code: 'CSE',
+        hod: 'Dr. Sarah Williams',
+        totalStudents: 450,
+        activeStudents: 420,
+    },
     // ... rest can stay or be empty, handled by backend eventually
 ];
 
@@ -19,7 +32,9 @@ export class StudentService {
         return res.json();
     }
     // ... rest of StudentService (kept for reference, already updated)
-    static async getById(id: number): Promise<Student | undefined> { return undefined; }
+    static async getById(id: number): Promise<Student | undefined> {
+        return undefined;
+    }
     static async create(student: Omit<Student, 'id'>): Promise<Student> {
         const res = await fetch('/api/students', {
             method: 'POST',
@@ -69,9 +84,14 @@ export class DepartmentService {
     }
 
     // Still mock for now as getById isn't strictly needed for list views yet
-    static getById(id: number): Department | undefined { return undefined }
+    static getById(id: number): Department | undefined {
+        return undefined;
+    }
 
-    static async update(id: number, dept: Partial<Department>): Promise<Department> {
+    static async update(
+        id: number,
+        dept: Partial<Department>,
+    ): Promise<Department> {
         const res = await fetch(`/api/departments/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -108,8 +128,12 @@ export class CourseService {
         return res.json();
     }
 
-    static getById(id: number): Course | undefined { return undefined }
-    static getByDepartment(deptId: number): Course[] { return [] }
+    static getById(id: number): Course | undefined {
+        return undefined;
+    }
+    static getByDepartment(deptId: number): Course[] {
+        return [];
+    }
 
     static async update(id: number, course: Partial<Course>): Promise<Course> {
         const res = await fetch(`/api/courses/${id}`, {
@@ -133,7 +157,11 @@ export class CourseService {
 
 // Attendance Service with real API
 export class AttendanceService {
-    static async markAttendance(data: { studentId: number, status: string, date?: string }): Promise<any> {
+    static async markAttendance(data: {
+        studentId: number;
+        status: string;
+        date?: string;
+    }): Promise<AttendanceData> {
         const res = await fetch('/api/attendance', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -143,7 +171,10 @@ export class AttendanceService {
         return res.json();
     }
 
-    static async getRecords(studentId?: number, date?: string): Promise<any[]> {
+    static async getRecords(
+        studentId?: number,
+        date?: string,
+    ): Promise<AttendanceData[]> {
         const params = new URLSearchParams();
         if (studentId) params.append('studentId', studentId.toString());
         if (date) params.append('date', date);
@@ -153,6 +184,10 @@ export class AttendanceService {
         return res.json();
     }
 
-    static getData(): AttendanceData[] { return ATTENDANCE_DATA }
-    static getRecentActivity(): RecentActivity[] { return RECENT_ACTIVITY }
+    static getData(): AttendanceData[] {
+        return ATTENDANCE_DATA;
+    }
+    static getRecentActivity(): RecentActivity[] {
+        return RECENT_ACTIVITY;
+    }
 }

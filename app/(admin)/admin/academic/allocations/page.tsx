@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, BookOpen, User, Calendar, Trash2, Search } from 'lucide-react';
+import { Plus, User, Calendar, Trash2, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -204,7 +204,8 @@ export default function SubjectAllocationsPage() {
             if (errors.length > 0) {
                 addToast(errors[0], 'error'); // Show first error
             }
-        } catch (error) {
+        } catch (err) {
+            console.error(err);
             addToast('An error occurred', 'error');
         }
         setCreating(false);
@@ -226,7 +227,8 @@ export default function SubjectAllocationsPage() {
             } else {
                 addToast('Failed to delete', 'error');
             }
-        } catch (e) {
+        } catch (err) {
+            console.error(err);
             addToast('Error deleting', 'error');
         }
     };

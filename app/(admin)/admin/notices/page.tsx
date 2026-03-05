@@ -10,7 +10,6 @@ import {
     CardDescription,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea'; // Assuming text area exists or use Input for now
 import { Loader2, Send, History, Bell, Megaphone } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 import { Badge } from '@/components/ui/badge';

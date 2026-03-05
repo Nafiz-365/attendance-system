@@ -2,13 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
     Table,
@@ -53,7 +47,6 @@ export default function DepartmentsPage() {
         activeStudents?: number;
     } | null>(null); // Track editing state
     const [submitting, setSubmitting] = useState(false);
-    const { addToast } = useToast();
 
     const filteredDepartments = departments.filter(
         (dept) =>
@@ -86,7 +79,8 @@ export default function DepartmentsPage() {
             }
             setIsModalOpen(false);
             form.reset();
-        } catch (error) {
+        } catch (err) {
+            console.error(err);
             // Toast handled in hook
         } finally {
             setSubmitting(false);

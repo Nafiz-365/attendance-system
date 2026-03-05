@@ -9,7 +9,7 @@ export async function GET(req: Request) {
         const section = searchParams.get("section");
         const teacherId = searchParams.get("teacherId");
 
-        let where: any = {};
+        const where: any = {};
 
         // Filter by Session
         if (sessionId) {

@@ -13,8 +13,6 @@ import { Input } from '@/components/ui/input';
 import {
     Download,
     FileText,
-    BarChart3,
-    PieChart,
     Activity,
     TrendingUp,
     Users,
@@ -68,7 +66,6 @@ interface ReportStats {
 export default function ReportsPage() {
     const [stats, setStats] = useState<ReportStats | null>(null);
     const [activities, setActivities] = useState<Activity[]>([]);
-    const [loading, setLoading] = useState(true);
     const [monthDate, setMonthDate] = useState(
         new Date().toISOString().split('T')[0]
     );
@@ -77,7 +74,6 @@ export default function ReportsPage() {
     const { addToast } = useToast();
 
     const fetchData = useCallback(async () => {
-        setLoading(true);
         try {
             const [statsRes, activityRes] = await Promise.all([
                 fetch('/api/reports/stats'),
@@ -87,11 +83,9 @@ export default function ReportsPage() {
             if (statsRes.ok) setStats((await statsRes.json()) as ReportStats);
             if (activityRes.ok)
                 setActivities((await activityRes.json()) as Activity[]);
-        } catch (error) {
-            console.error(error);
+        } catch (err) {
+            console.error(err);
             addToast('Failed to load dashboard data', 'error');
-        } finally {
-            setLoading(false);
         }
     }, [addToast]);
 
@@ -138,7 +132,8 @@ export default function ReportsPage() {
             } else {
                 throw new Error('Export failed');
             }
-        } catch (error) {
+        } catch (err) {
+            console.error(err);
             addToast('Failed to export PDF', 'error');
         } finally {
             setExporting(false);
@@ -173,7 +168,8 @@ export default function ReportsPage() {
             } else {
                 throw new Error('Export failed');
             }
-        } catch (error) {
+        } catch (err) {
+            console.error(err);
             addToast('Failed to export Excel', 'error');
         } finally {
             setExporting(false);

@@ -1,7 +1,8 @@
 import { hash, compare } from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 
-const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production';
+const SECRET_KEY =
+    process.env.JWT_SECRET || 'your-secret-key-change-this-in-production';
 const key = new TextEncoder().encode(SECRET_KEY);
 
 export async function hashPassword(password: string) {
@@ -12,7 +13,7 @@ export async function verifyPassword(password: string, hash: string) {
     return await compare(password, hash);
 }
 
-export async function signJWT(payload: any) {
+export async function signJWT(payload: Record<string, unknown>) {
     return await new SignJWT(payload)
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()
@@ -33,7 +34,10 @@ export async function getSession(request: Request) {
     const cookieHeader = request.headers.get('Cookie');
     if (!cookieHeader) return null;
 
-    const token = cookieHeader.split(';').find(c => c.trim().startsWith('token='))?.split('=')[1];
+    const token = cookieHeader
+        .split(';')
+        .find((c) => c.trim().startsWith('token='))
+        ?.split('=')[1];
     if (!token) return null;
 
     return await verifyJWT(token);

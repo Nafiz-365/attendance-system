@@ -24,7 +24,11 @@ export function Captcha({ onVerify }: CaptchaProps) {
     }
 
     useEffect(() => {
-        generateCaptcha()
+        const timer = setTimeout(() => {
+            generateCaptcha()
+        }, 0)
+        return () => clearTimeout(timer)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const handleVerify = () => {
@@ -41,7 +45,7 @@ export function Captcha({ onVerify }: CaptchaProps) {
 
     return (
         <div className="space-y-2">
-            <label className="text-sm font-medium">Verify you're human *</label>
+            <label className="text-sm font-medium">Verify you&apos;re human *</label>
             <div className="flex items-center gap-2">
                 <div className="flex-1 flex items-center gap-2 p-3 bg-muted rounded-lg border-2">
                     <span className="font-mono text-lg font-bold">
