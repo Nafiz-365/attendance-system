@@ -88,7 +88,7 @@ export default function StudentDashboard() {
                 setRefreshing(false);
             }
         },
-        [addToast]
+        [addToast],
     );
 
     useEffect(() => {
@@ -103,7 +103,7 @@ export default function StudentDashboard() {
                     // Filter for students only
                     const studentNotices = allNotices.filter(
                         (n: { audience: string }) =>
-                            n.audience === 'ALL' || n.audience === 'STUDENTS'
+                            n.audience === 'ALL' || n.audience === 'STUDENTS',
                     );
                     setNotices(studentNotices.slice(0, 3)); // Show latest 3
                 }
@@ -296,14 +296,14 @@ export default function StudentDashboard() {
                                                     'Class Activity'}{' '}
                                                 -{' '}
                                                 {new Date(
-                                                    record.date
+                                                    record.date,
                                                 ).toLocaleDateString(
                                                     undefined,
                                                     {
                                                         weekday: 'short',
                                                         month: 'short',
                                                         day: 'numeric',
-                                                    }
+                                                    },
                                                 )}
                                             </p>
                                             <p className="text-xs text-muted-foreground">
@@ -312,7 +312,7 @@ export default function StudentDashboard() {
                                                     ?.name || 'Teacher'}{' '}
                                                 at{' '}
                                                 {new Date(
-                                                    record.date
+                                                    record.date,
                                                 ).toLocaleTimeString()}
                                             </p>
                                         </div>
@@ -321,14 +321,14 @@ export default function StudentDashboard() {
                                                 record.status === 'Present'
                                                     ? 'default'
                                                     : record.status === 'Absent'
-                                                    ? 'destructive'
-                                                    : 'secondary'
+                                                      ? 'destructive'
+                                                      : 'secondary'
                                             }
                                         >
                                             {record.status}
                                         </Badge>
                                     </div>
-                                )
+                                ),
                             )}
                         </div>
                     </CardContent>
@@ -368,7 +368,7 @@ export default function StudentDashboard() {
                                         </p>
                                         <p className="text-[10px] text-muted-foreground/60 mt-1">
                                             {new Date(
-                                                notice.createdAt
+                                                notice.createdAt,
                                             ).toLocaleDateString()}
                                         </p>
                                     </div>

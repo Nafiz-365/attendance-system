@@ -52,7 +52,7 @@ export default function DepartmentsPage() {
         (dept) =>
             dept.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             dept.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            dept.hod.toLowerCase().includes(searchTerm.toLowerCase())
+            dept.hod.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -89,11 +89,11 @@ export default function DepartmentsPage() {
 
     const totalStudents = departments.reduce(
         (sum, dept) => sum + (dept.totalStudents || 0),
-        0
+        0,
     );
     const activeStudents = departments.reduce(
         (sum, dept) => sum + (dept.activeStudents || 0),
-        0
+        0,
     );
     const attendanceRate =
         totalStudents > 0
@@ -256,7 +256,7 @@ export default function DepartmentsPage() {
                                             ? Math.round(
                                                   ((dept.activeStudents || 0) /
                                                       dept.totalStudents) *
-                                                      100
+                                                      100,
                                               )
                                             : 0;
                                     return (
@@ -285,9 +285,9 @@ export default function DepartmentsPage() {
                                                         deptAttendance >= 80
                                                             ? 'default'
                                                             : deptAttendance >=
-                                                              60
-                                                            ? 'secondary'
-                                                            : 'destructive'
+                                                                60
+                                                              ? 'secondary'
+                                                              : 'destructive'
                                                     }
                                                 >
                                                     {deptAttendance}% Active
@@ -314,7 +314,7 @@ export default function DepartmentsPage() {
                                                         className="text-destructive hover:bg-destructive/10"
                                                         onClick={() =>
                                                             deleteDepartment(
-                                                                dept.id
+                                                                dept.id,
                                                             )
                                                         }
                                                     >

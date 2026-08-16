@@ -85,7 +85,7 @@ export default function AdminLeavesPage() {
 
     const handleUpdateStatus = async (
         id: number,
-        status: 'APPROVED' | 'REJECTED'
+        status: 'APPROVED' | 'REJECTED',
     ) => {
         setUpdatingId(id);
         try {
@@ -360,14 +360,14 @@ export default function AdminLeavesPage() {
                                             <span>
                                                 {format(
                                                     new Date(leave.startDate),
-                                                    'MMM d'
+                                                    'MMM d',
                                                 )}
                                                 <span className="text-muted-foreground mx-1">
                                                     ➜
                                                 </span>
                                                 {format(
                                                     new Date(leave.endDate),
-                                                    'MMM d, yyyy'
+                                                    'MMM d, yyyy',
                                                 )}
                                             </span>
                                         </div>
@@ -379,7 +379,7 @@ export default function AdminLeavesPage() {
                                                 onClick={() =>
                                                     handleUpdateStatus(
                                                         leave.id,
-                                                        'APPROVED'
+                                                        'APPROVED',
                                                     )
                                                 }
                                                 disabled={
@@ -400,7 +400,7 @@ export default function AdminLeavesPage() {
                                                 onClick={() =>
                                                     handleUpdateStatus(
                                                         leave.id,
-                                                        'REJECTED'
+                                                        'REJECTED',
                                                     )
                                                 }
                                                 disabled={
@@ -502,18 +502,18 @@ export default function AdminLeavesPage() {
                                             <div className="text-sm font-medium">
                                                 {format(
                                                     new Date(leave.startDate),
-                                                    'MMM d'
+                                                    'MMM d',
                                                 )}{' '}
                                                 -{' '}
                                                 {format(
                                                     new Date(leave.endDate),
-                                                    'MMM d'
+                                                    'MMM d',
                                                 )}
                                             </div>
                                             <div className="text-xs text-muted-foreground">
                                                 {format(
                                                     new Date(leave.createdAt),
-                                                    'yyyy'
+                                                    'yyyy',
                                                 )}
                                             </div>
                                         </TableCell>
@@ -538,7 +538,7 @@ export default function AdminLeavesPage() {
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-bold">
                                                         {leave.approvedBy.name.charAt(
-                                                            0
+                                                            0,
                                                         )}
                                                     </div>
                                                     <div className="flex flex-col">

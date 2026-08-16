@@ -53,7 +53,7 @@ function AttendanceContent() {
     const [allocation, setAllocation] = useState<Allocation | null>(null);
     const [students, setStudents] = useState<Student[]>([]);
     const [selectedDate, setSelectedDate] = useState(
-        new Date().toISOString().split('T')[0]
+        new Date().toISOString().split('T')[0],
     );
 
     // State for missing allocation selection
@@ -71,7 +71,7 @@ function AttendanceContent() {
             try {
                 // 1. Get Teacher ID
                 const teacherRes = await fetch(
-                    `/api/teachers?email=${userData.email}`
+                    `/api/teachers?email=${userData.email}`,
                 );
                 if (teacherRes.ok) {
                     const teachers = await teacherRes.json();
@@ -91,14 +91,14 @@ function AttendanceContent() {
                                     const match = a.teacherId == teacherId;
                                     if (match) console.log('Match found:', a);
                                     return match;
-                                }
+                                },
                             );
 
                             setAllocations(myAllocations);
 
                             if (myAllocations.length === 0) {
                                 setDebugInfo(
-                                    `Teacher ID: ${teacherId}, Total Allocations: ${all.length}. No matches found.`
+                                    `Teacher ID: ${teacherId}, Total Allocations: ${all.length}. No matches found.`,
                                 );
                             }
                         } else {
@@ -106,7 +106,7 @@ function AttendanceContent() {
                         }
                     } else {
                         setDebugInfo(
-                            `No teacher profile found for email: ${userData.email}`
+                            `No teacher profile found for email: ${userData.email}`,
                         );
                     }
                 } else {
@@ -115,7 +115,7 @@ function AttendanceContent() {
             } catch (e: Error | unknown) {
                 console.error('Failed to fetch classes', e);
                 setDebugInfo(
-                    `Error: ${e instanceof Error ? e.message : String(e)}`
+                    `Error: ${e instanceof Error ? e.message : String(e)}`,
                 );
             }
         } else {
@@ -130,7 +130,7 @@ function AttendanceContent() {
             if (allRes.ok) {
                 const all = await allRes.json();
                 const found = all.find(
-                    (a: Allocation) => a.id === parseInt(id)
+                    (a: Allocation) => a.id === parseInt(id),
                 );
                 if (found) {
                     setAllocation(found);
@@ -150,7 +150,7 @@ function AttendanceContent() {
     const fetchStudents = async (batch: string, section: string) => {
         try {
             const res = await fetch(
-                `/api/students?batch=${batch}&section=${section}`
+                `/api/students?batch=${batch}&section=${section}`,
             );
             if (res.ok) {
                 const data = await res.json();
@@ -158,7 +158,7 @@ function AttendanceContent() {
                     data.map((s: Omit<Student, 'status'>) => ({
                         ...s,
                         status: null,
-                    }))
+                    })),
                 );
             }
         } catch (e) {
@@ -180,16 +180,16 @@ function AttendanceContent() {
 
     const markAttendance = (
         studentId: number,
-        status: 'Present' | 'Absent' | 'Late'
+        status: 'Present' | 'Absent' | 'Late',
     ) => {
         setStudents(
-            students.map((s) => (s.id === studentId ? { ...s, status } : s))
+            students.map((s) => (s.id === studentId ? { ...s, status } : s)),
         );
     };
 
     const markAllPresent = () => {
         setStudents(
-            students.map((s) => ({ ...s, status: 'Present' as const }))
+            students.map((s) => ({ ...s, status: 'Present' as const })),
         );
         addToast('Marked all students as present', 'success');
     };
@@ -199,7 +199,7 @@ function AttendanceContent() {
         if (unmarked > 0) {
             if (
                 !confirm(
-                    `Warning: ${unmarked} students are not marked. Save anyway?`
+                    `Warning: ${unmarked} students are not marked. Save anyway?`,
                 )
             )
                 return;
@@ -277,7 +277,7 @@ function AttendanceContent() {
                                         className="cursor-pointer border rounded-lg p-4 hover:bg-muted/50 transition-colors flex flex-col gap-2 ring-1 ring-border hover:ring-primary"
                                         onClick={() =>
                                             handleAllocationSelect(
-                                                alloc.id.toString()
+                                                alloc.id.toString(),
                                             )
                                         }
                                     >
@@ -433,7 +433,7 @@ function AttendanceContent() {
                                                     onClick={() =>
                                                         markAttendance(
                                                             student.id,
-                                                            'Present'
+                                                            'Present',
                                                         )
                                                     }
                                                 >
@@ -456,7 +456,7 @@ function AttendanceContent() {
                                                     onClick={() =>
                                                         markAttendance(
                                                             student.id,
-                                                            'Absent'
+                                                            'Absent',
                                                         )
                                                     }
                                                 >
@@ -479,7 +479,7 @@ function AttendanceContent() {
                                                     onClick={() =>
                                                         markAttendance(
                                                             student.id,
-                                                            'Late'
+                                                            'Late',
                                                         )
                                                     }
                                                 >

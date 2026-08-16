@@ -194,7 +194,7 @@ export default function AcademicSessionsPage() {
                             <CardDescription>
                                 {format(
                                     new Date(session.startDate),
-                                    'MMM yyyy'
+                                    'MMM yyyy',
                                 )}{' '}
                                 -{' '}
                                 {format(new Date(session.endDate), 'MMM yyyy')}
@@ -215,31 +215,31 @@ export default function AcademicSessionsPage() {
                                     onClick={async () => {
                                         if (
                                             confirm(
-                                                'Are you sure? This will delete all allocations checking this session!'
+                                                'Are you sure? This will delete all allocations checking this session!',
                                             )
                                         ) {
                                             try {
                                                 const res = await fetch(
                                                     `/api/academic/sessions?id=${session.id}`,
-                                                    { method: 'DELETE' }
+                                                    { method: 'DELETE' },
                                                 );
                                                 if (res.ok) {
                                                     addToast(
                                                         'Session deleted',
-                                                        'success'
+                                                        'success',
                                                     );
                                                     fetchSessions();
                                                 } else {
                                                     addToast(
                                                         'Failed to delete',
-                                                        'error'
+                                                        'error',
                                                     );
                                                 }
                                             } catch (err) {
                                                 console.error(err);
                                                 addToast(
                                                     'Error deleting session',
-                                                    'error'
+                                                    'error',
                                                 );
                                             }
                                         }

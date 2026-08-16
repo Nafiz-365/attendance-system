@@ -9,13 +9,13 @@ export const ROUTES = {
     COURSES: '/courses',
     ATTENDANCE: '/attendance',
     REPORTS: '/reports',
-} as const
+} as const;
 
-export const APP_NAME = 'Varsity Portal'
-export const APP_DESCRIPTION = 'Student Attendance Management System'
+export const APP_NAME = 'Varsity Portal';
+export const APP_DESCRIPTION = 'Student Attendance Management System';
 
 export const THEME = {
     DEFAULT: 'system',
     LIGHT: 'light',
     DARK: 'dark',
-} as const
+} as const;

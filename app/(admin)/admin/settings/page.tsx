@@ -121,7 +121,7 @@ export default function SettingsPage() {
     const handleDelete = async (id: number) => {
         if (
             !confirm(
-                'Delete this session? This will affect all associated allocations.'
+                'Delete this session? This will affect all associated allocations.',
             )
         )
             return;
@@ -261,12 +261,12 @@ export default function SettingsPage() {
                                             <div className="text-xs text-muted-foreground mt-1">
                                                 {format(
                                                     new Date(session.startDate),
-                                                    'MMM d, yyyy'
+                                                    'MMM d, yyyy',
                                                 )}{' '}
                                                 -{' '}
                                                 {format(
                                                     new Date(session.endDate),
-                                                    'MMM d, yyyy'
+                                                    'MMM d, yyyy',
                                                 )}
                                             </div>
                                         </div>
@@ -279,7 +279,7 @@ export default function SettingsPage() {
                                                     onClick={() =>
                                                         toggleActive(
                                                             session.id,
-                                                            false
+                                                            false,
                                                         )
                                                     }
                                                 >

@@ -132,7 +132,7 @@ export default function SubjectAllocationsPage() {
     const fetchAllocations = async (sessionId: string) => {
         try {
             const res = await fetch(
-                `/api/academic/allocations?sessionId=${sessionId}`
+                `/api/academic/allocations?sessionId=${sessionId}`,
             );
             if (res.ok) {
                 setAllocations(await res.json());
@@ -146,7 +146,7 @@ export default function SubjectAllocationsPage() {
         setSelectedSections((prev) =>
             prev.includes(section)
                 ? prev.filter((s) => s !== section)
-                : [...prev, section]
+                : [...prev, section],
         );
     };
 
@@ -187,7 +187,7 @@ export default function SubjectAllocationsPage() {
             if (successCount > 0) {
                 addToast(
                     `Allocated ${successCount} sections successfully`,
-                    'success'
+                    'success',
                 );
                 setOpen(false);
                 fetchAllocations(selectedSession);
@@ -237,7 +237,7 @@ export default function SubjectAllocationsPage() {
         (a) =>
             a.teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             a.course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            a.course.name.toLowerCase().includes(searchTerm.toLowerCase())
+            a.course.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
     if (loading) return <div>Loading...</div>;
@@ -350,7 +350,7 @@ export default function SubjectAllocationsPage() {
                                         </option>
                                         {Array.from(
                                             { length: 11 },
-                                            (_, i) => 50 + i
+                                            (_, i) => 50 + i,
                                         ).map((batch) => (
                                             <option
                                                 key={batch}
@@ -383,7 +383,7 @@ export default function SubjectAllocationsPage() {
                                                     w-10 h-10 flex items-center justify-center rounded-md border cursor-pointer transition-colors font-medium
                                                     ${
                                                         selectedSections.includes(
-                                                            section
+                                                            section,
                                                         )
                                                             ? 'bg-primary text-primary-foreground border-primary'
                                                             : 'hover:bg-muted'

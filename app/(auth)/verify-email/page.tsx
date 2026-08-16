@@ -44,7 +44,7 @@ export default function VerifyEmailPage() {
         if (resendTimer > 0) {
             const timer = setTimeout(
                 () => setResendTimer(resendTimer - 1),
-                1000
+                1000,
             );
             return () => clearTimeout(timer);
         }
@@ -58,20 +58,20 @@ export default function VerifyEmailPage() {
             if (code === storedOTP) {
                 // Mark user as verified
                 const users = JSON.parse(
-                    localStorage.getItem('registered_users') || '[]'
+                    localStorage.getItem('registered_users') || '[]',
                 );
                 const email = localStorage.getItem(
-                    'pending_verification_email'
+                    'pending_verification_email',
                 );
 
                 const userIndex = users.findIndex(
-                    (u: User) => u.email === email
+                    (u: User) => u.email === email,
                 );
                 if (userIndex !== -1) {
                     users[userIndex].verified = true;
                     localStorage.setItem(
                         'registered_users',
-                        JSON.stringify(users)
+                        JSON.stringify(users),
                     );
                     localStorage.removeItem('pending_verification_email');
                 }
@@ -81,7 +81,7 @@ export default function VerifyEmailPage() {
             } else {
                 addToast(
                     'Invalid verification code. Please try again.',
-                    'error'
+                    'error',
                 );
             }
             setLoading(false);
@@ -126,7 +126,7 @@ export default function VerifyEmailPage() {
                                     setCode(
                                         e.target.value
                                             .replace(/\D/g, '')
-                                            .slice(0, 6)
+                                            .slice(0, 6),
                                     )
                                 }
                                 maxLength={6}

@@ -15,7 +15,7 @@ import {
 import { Modal } from '@/components/ui/modal';
 import { useCourses } from '@/hooks/useCourses';
 import { useDepartments } from '@/hooks/useDepartments';
-import { CourseImportModal } from '@/components/course-import-modal';
+import { GenericImportModal } from '@/components/generic-import-modal';
 import {
     Plus,
     Search,
@@ -537,10 +537,62 @@ export default function CoursesPage() {
                 </form>
             </Modal>
 
-            <CourseImportModal
+            <GenericImportModal<{
+                name: string;
+                code: string;
+                credits: number;
+                departmentId: string | number;
+                instructor: string;
+            }>
                 isOpen={isImportModalOpen}
                 onClose={() => setIsImportModalOpen(false)}
+                title="Import Courses"
                 onImport={handleImport}
+                dataFormatter={(row) => {
+                    const code = String(
+                        row['Course Code'] || row['Code'] || row['code'] || '',
+                    );
+                    const name = String(
+                        row['Course Name'] || row['Name'] || row['name'] || '',
+                    );
+                    if (!code || !name) return null;
+                    return {
+                        code,
+                        name,
+                        credits: Number(row['Credits'] || row['credits'] || 3),
+                        instructor: String(
+                            row['Instructor'] || row['instructor'] || '',
+                        ),
+                        departmentId: String(
+                            row['Department ID'] ||
+                                row['departmentId'] ||
+                                row['Department Code'] ||
+                                '',
+                        ),
+                    };
+                }}
+                previewColumns={[
+                    { key: 'code', label: 'Code' },
+                    { key: 'name', label: 'Name' },
+                    { key: 'credits', label: 'Credits', align: 'right' },
+                    { key: 'departmentId', label: 'Dept', align: 'right' },
+                ]}
+                templateHeaders={[
+                    'Course Code',
+                    'Course Name',
+                    'Credits',
+                    'Instructor',
+                    'Department ID',
+                ]}
+                templateSampleRow={[
+                    'CS101',
+                    'Introduction to Programming',
+                    3,
+                    'Dr. Smith',
+                    '1',
+                ]}
+                templateFilename="course_import_template.xlsx"
+                importLabel="Import Courses"
             />
         </div>
     );

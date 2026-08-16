@@ -208,7 +208,7 @@ export default function NoticesPage() {
                                             <Bell className="w-3 h-3" />{' '}
                                             {format(
                                                 new Date(notice.createdAt),
-                                                'MMM d, h:mm a'
+                                                'MMM d, h:mm a',
                                             )}
                                         </div>
                                     </div>

@@ -48,7 +48,7 @@ export default function TeacherClassesPage() {
                     // Use optional chaining to avoid crashes if generated with incomplete data
                     const myClasses = allAllocations.filter(
                         (a: ClassAllocation) =>
-                            a.teacher?.user?.email === user.email
+                            a.teacher?.user?.email === user.email,
                     );
                     setClasses(myClasses);
                 }

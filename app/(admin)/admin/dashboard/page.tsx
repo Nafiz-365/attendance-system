@@ -59,7 +59,7 @@ export default function DashboardPage() {
             setLoading(true);
             try {
                 const res = await fetch(
-                    `/api/dashboard/stats?period=${selectedPeriod}`
+                    `/api/dashboard/stats?period=${selectedPeriod}`,
                 );
                 if (res.ok) {
                     const data = await res.json();
@@ -144,8 +144,8 @@ export default function DashboardPage() {
                 selectedPeriod === 'today'
                     ? 'Today'
                     : selectedPeriod === 'week'
-                    ? 'This Week'
-                    : 'This Month',
+                      ? 'This Week'
+                      : 'This Month',
         },
         {
             title: 'Absent',
@@ -157,8 +157,8 @@ export default function DashboardPage() {
                 selectedPeriod === 'today'
                     ? 'Today'
                     : selectedPeriod === 'week'
-                    ? 'This Week'
-                    : 'This Month',
+                      ? 'This Week'
+                      : 'This Month',
         },
         {
             title: 'Late Arrivals',
@@ -170,8 +170,8 @@ export default function DashboardPage() {
                 selectedPeriod === 'today'
                     ? 'Today'
                     : selectedPeriod === 'week'
-                    ? 'This Week'
-                    : 'This Month',
+                      ? 'This Week'
+                      : 'This Month',
         },
     ];
 
@@ -303,7 +303,7 @@ export default function DashboardPage() {
                                                 </p>
                                                 <p className="text-sm text-muted-foreground">
                                                     {new Date(
-                                                        activity.time
+                                                        activity.time,
                                                     ).toLocaleTimeString()}
                                                 </p>
                                             </div>
@@ -415,8 +415,8 @@ export default function DashboardPage() {
                                                 cls.rate >= 80
                                                     ? 'text-green-600'
                                                     : cls.rate >= 50
-                                                    ? 'text-yellow-600'
-                                                    : 'text-red-600'
+                                                      ? 'text-yellow-600'
+                                                      : 'text-red-600'
                                             }`}
                                         >
                                             {cls.rate}%

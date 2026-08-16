@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
+
 import {
     Loader2,
     Upload,
@@ -24,29 +25,37 @@ import {
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 
-interface StudentData {
-    studentId: string;
-    name: string;
-    email: string;
-    batch: string;
-    section: string;
-    departmentCode: string;
-    departmentId: string;
-}
-
-interface StudentImportModalProps {
+interface GenericImportModalProps<T> {
     isOpen: boolean;
     onClose: () => void;
-    onImport: (data: StudentData[]) => Promise<void>;
+    title: string;
+    onImport: (data: T[]) => Promise<void>;
+    dataFormatter: (row: Record<string, any>) => T | null; // Return null if invalid
+    previewColumns: {
+        key: keyof T;
+        label: string;
+        align?: 'left' | 'center' | 'right';
+    }[];
+    templateHeaders: string[];
+    templateSampleRow: any[];
+    templateFilename: string;
+    importLabel?: string;
 }
 
-export function StudentImportModal({
+export function GenericImportModal<T extends Record<string, any>>({
     isOpen,
     onClose,
+    title,
     onImport,
-}: StudentImportModalProps) {
+    dataFormatter,
+    previewColumns,
+    templateHeaders,
+    templateSampleRow,
+    templateFilename,
+    importLabel = 'Import',
+}: GenericImportModalProps<T>) {
     const [file, setFile] = useState<File | null>(null);
-    const [preview, setPreview] = useState<StudentData[]>([]);
+    const [preview, setPreview] = useState<T[]>([]);
     const [error, setError] = useState('');
     const [importing, setImporting] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
@@ -87,48 +96,19 @@ export function StudentImportModal({
                 const workbook = XLSX.read(data, { type: 'binary' });
                 const sheetName = workbook.SheetNames[0];
                 const sheet = workbook.Sheets[sheetName];
-                const jsonData = XLSX.utils.sheet_to_json(sheet) as Array<
-                    Record<string, unknown>
-                >;
+                const jsonData = XLSX.utils.sheet_to_json(sheet) as Record<
+                    string,
+                    unknown
+                >[];
 
-                // Validate and format data
                 const formattedData = jsonData
-                    .map((row) => ({
-                        studentId: String(
-                            row['Student ID'] ||
-                                row['studentId'] ||
-                                row['ID'] ||
-                                row['Roll No'] ||
-                                row['Roll'] ||
-                                '',
-                        ),
-                        name: String(row['Name'] || row['name'] || ''),
-                        email: String(row['Email'] || row['email'] || ''),
-                        batch: String(row['Batch'] || row['batch'] || ''),
-                        section: String(row['Section'] || row['section'] || ''),
-                        // Support Department Code (preferred) or ID
-                        departmentCode: String(
-                            row['Department Code'] ||
-                                row['Department'] ||
-                                row['departmentCode'] ||
-                                '',
-                        ),
-                        departmentId: String(
-                            row['Department ID'] || row['departmentId'] || '',
-                        ),
-                    }))
-                    .filter((s) => s.studentId && s.name); // Basic validation
+                    .map(dataFormatter)
+                    .filter((item): item is T => item !== null);
 
                 if (formattedData.length === 0) {
-                    setError('No valid student data found in the file.');
+                    setError('No valid data found in the file.');
                 } else {
                     setPreview(formattedData);
-                    // Helpful alert if rows were dropped
-                    if (jsonData.length > formattedData.length) {
-                        const skipped = jsonData.length - formattedData.length;
-                        // Using error state for visibility, or we could add a warning state
-                        // For now let's just use the count in the success UI
-                    }
                 }
             } catch (err: unknown) {
                 console.error(err);
@@ -145,14 +125,10 @@ export function StudentImportModal({
             setImporting(true);
             await onImport(preview);
             resetState();
-            // Don't close immediately if we want to show success message?
-            // The parent handler usually closes or toasts.
             onClose();
         } catch (err: unknown) {
             const errorMessage =
-                err instanceof Error
-                    ? err.message
-                    : 'Failed to import students';
+                err instanceof Error ? err.message : `Failed to import`;
             setError(errorMessage);
         } finally {
             setImporting(false);
@@ -167,22 +143,13 @@ export function StudentImportModal({
     };
 
     const downloadTemplate = () => {
-        // Updated headers to be more user friendly
-        const headers = [
-            'Student ID',
-            'Name',
-            'Email',
-            'Batch',
-            'Section',
-            'Department Code',
-        ];
         const ws = XLSX.utils.aoa_to_sheet([
-            headers,
-            ['S101', 'John Doe', 'john@example.com', '50', 'A', 'CSE'],
+            templateHeaders,
+            templateSampleRow,
         ]);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Template');
-        XLSX.writeFile(wb, 'student_import_template.xlsx');
+        XLSX.writeFile(wb, templateFilename);
     };
 
     return (
@@ -192,7 +159,7 @@ export function StudentImportModal({
                 onClose();
                 resetState();
             }}
-            title="Import Students"
+            title={title}
         >
             <div className="space-y-6">
                 {!file && (
@@ -270,7 +237,6 @@ export function StudentImportModal({
                             <div className="text-sm font-medium flex items-center gap-2 text-green-600">
                                 <CheckCircle className="w-4 h-4" />
                                 {preview.length} valid records found
-                                {/* Show skip count if necessary, but requires new state */}
                             </div>
                             <Button
                                 variant="link"
@@ -286,31 +252,35 @@ export function StudentImportModal({
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="w-[100px]">
-                                            ID
-                                        </TableHead>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead>Batch</TableHead>
-                                        <TableHead className="text-right">
-                                            Dept
-                                        </TableHead>
+                                        {previewColumns.map((col) => (
+                                            <TableHead
+                                                key={String(col.key)}
+                                                className={cn(
+                                                    col.align === 'right' &&
+                                                        'text-right',
+                                                )}
+                                            >
+                                                {col.label}
+                                            </TableHead>
+                                        ))}
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {preview.slice(0, 10).map((row, i) => (
                                         <TableRow key={i}>
-                                            <TableCell className="font-mono text-xs">
-                                                {row.studentId}
-                                            </TableCell>
-                                            <TableCell className="text-xs">
-                                                {row.name}
-                                            </TableCell>
-                                            <TableCell className="text-xs">
-                                                {row.batch}
-                                            </TableCell>
-                                            <TableCell className="text-xs text-right">
-                                                {row.departmentId}
-                                            </TableCell>
+                                            {previewColumns.map((col, j) => (
+                                                <TableCell
+                                                    key={String(col.key)}
+                                                    className={cn(
+                                                        'text-xs',
+                                                        j === 0 && 'font-mono',
+                                                        col.align === 'right' &&
+                                                            'text-right',
+                                                    )}
+                                                >
+                                                    {String(row[col.key] || '')}
+                                                </TableCell>
+                                            ))}
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -351,7 +321,7 @@ export function StudentImportModal({
                             ) : (
                                 <Upload className="w-4 h-4 mr-2" />
                             )}
-                            Import Students
+                            {importLabel}
                         </Button>
                     </div>
                 </div>

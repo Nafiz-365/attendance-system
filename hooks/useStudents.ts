@@ -1,34 +1,27 @@
-import { useState, useEffect } from 'react';
+import useSWR from 'swr';
 import { Student } from '@/types';
 import { StudentService } from '@/services';
 import { useToast } from '@/components/ui/toast';
 
+const fetcher = async () => {
+    const res = await fetch('/api/students');
+    if (!res.ok) throw new Error('Failed to fetch students');
+    return res.json();
+};
+
 export function useStudents() {
-    const [students, setStudents] = useState<Student[]>([]);
-    const [loading, setLoading] = useState(true);
+    const {
+        data: students = [],
+        error,
+        isLoading,
+        mutate,
+    } = useSWR<Student[]>('/api/students', fetcher);
     const { addToast } = useToast();
-
-    const fetchStudents = async () => {
-        try {
-            setLoading(true);
-            const data = await StudentService.getAll();
-            setStudents(data);
-        } catch (error) {
-            console.error(error);
-            addToast('Failed to load students', 'error');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchStudents();
-    }, []);
 
     const addStudent = async (student: Omit<Student, 'id'>) => {
         try {
             const newStudent = await StudentService.create(student);
-            setStudents((prev) => [newStudent, ...prev]); // Add to top
+            mutate((prev = []) => [newStudent, ...prev], false); // Optimistic update
             addToast('Student added successfully', 'success');
             return newStudent;
         } catch (error: unknown) {
@@ -44,7 +37,10 @@ export function useStudents() {
     const updateStudent = async (id: number, data: Partial<Student>) => {
         try {
             const updated = await StudentService.update(id, data);
-            setStudents((prev) => prev.map((s) => (s.id === id ? updated : s)));
+            mutate(
+                (prev = []) => prev.map((s) => (s.id === id ? updated : s)),
+                false,
+            );
             addToast('Student updated successfully', 'success');
             return updated;
         } catch (error: unknown) {
@@ -61,7 +57,7 @@ export function useStudents() {
         try {
             const success = await StudentService.delete(id);
             if (success) {
-                setStudents((prev) => prev.filter((s) => s.id !== id));
+                mutate((prev = []) => prev.filter((s) => s.id !== id), false);
                 addToast('Student deleted successfully', 'success');
             }
             return success;
@@ -70,12 +66,12 @@ export function useStudents() {
         }
     };
 
-    const importStudents = async (students: Omit<Student, 'id'>[]) => {
+    const importStudents = async (studentsList: Omit<Student, 'id'>[]) => {
         try {
             const res = await fetch('/api/students/bulk', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ students }),
+                body: JSON.stringify({ students: studentsList }),
             });
             if (!res.ok) throw new Error('Import failed');
             const result = await res.json();
@@ -83,7 +79,7 @@ export function useStudents() {
                 `Successfully imported ${result.count} students`,
                 'success',
             );
-            fetchStudents(); // Refresh list
+            mutate(); // Refresh list
             return result;
         } catch (error: unknown) {
             const message =
@@ -97,11 +93,12 @@ export function useStudents() {
 
     return {
         students,
-        loading,
+        loading: isLoading,
+        error,
         addStudent,
         updateStudent,
         deleteStudent,
         importStudents,
-        refresh: fetchStudents,
+        refresh: mutate,
     };
 }

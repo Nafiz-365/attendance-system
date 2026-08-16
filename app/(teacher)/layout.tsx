@@ -1,10 +1,10 @@
-import { TeacherSidebar } from "@/components/layout/teacher-sidebar"
-import { Header } from "@/components/layout/header"
+import { TeacherSidebar } from '@/components/layout/teacher-sidebar';
+import { Header } from '@/components/layout/header';
 
 export default function TeacherLayout({
     children,
 }: {
-    children: React.ReactNode
+    children: React.ReactNode;
 }) {
     return (
         <div className="flex min-h-screen">
@@ -16,5 +16,5 @@ export default function TeacherLayout({
                 </main>
             </div>
         </div>
-    )
+    );
 }

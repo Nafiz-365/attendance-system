@@ -104,14 +104,14 @@ export default function TimetablePage() {
                     // Currently getting all for session, then filtering client side or adding API param
                     // Let's rely on basic list for now
                     const res = await fetch(
-                        `/api/academic/allocations?sessionId=${selectedSession}`
+                        `/api/academic/allocations?sessionId=${selectedSession}`,
                     );
                     if (res.ok) {
                         const all = await res.json();
                         // Client-side filter for now
                         const filtered = all.filter(
                             (a: Allocation) =>
-                                a.batch === batch && a.section === section
+                                a.batch === batch && a.section === section,
                         );
                         setAllocations(filtered);
                     }
@@ -123,7 +123,7 @@ export default function TimetablePage() {
             const fetchRoutines = async () => {
                 try {
                     const res = await fetch(
-                        `/api/academic/routines?sessionId=${selectedSession}&batch=${batch}&section=${section}`
+                        `/api/academic/routines?sessionId=${selectedSession}&batch=${batch}&section=${section}`,
                     );
                     if (res.ok) {
                         setRoutines(await res.json());
@@ -152,7 +152,7 @@ export default function TimetablePage() {
                 setOpen(false);
                 // Refetch routines
                 const routinesRes = await fetch(
-                    `/api/academic/routines?sessionId=${selectedSession}&batch=${batch}&section=${section}`
+                    `/api/academic/routines?sessionId=${selectedSession}&batch=${batch}&section=${section}`,
                 );
                 if (routinesRes.ok) {
                     setRoutines(await routinesRes.json());
@@ -175,7 +175,7 @@ export default function TimetablePage() {
             });
             // Refetch routines
             const routinesRes = await fetch(
-                `/api/academic/routines?sessionId=${selectedSession}&batch=${batch}&section=${section}`
+                `/api/academic/routines?sessionId=${selectedSession}&batch=${batch}&section=${section}`,
             );
             if (routinesRes.ok) {
                 setRoutines(await routinesRes.json());
@@ -244,20 +244,20 @@ export default function TimetablePage() {
                         onClick={() => {
                             if (selectedSession && batch && section) {
                                 fetch(
-                                    `/api/academic/allocations?sessionId=${selectedSession}`
+                                    `/api/academic/allocations?sessionId=${selectedSession}`,
                                 )
                                     .then((res) => res.json())
                                     .then((all) => {
                                         const filtered = all.filter(
                                             (a: Allocation) =>
                                                 a.batch === batch &&
-                                                a.section === section
+                                                a.section === section,
                                         );
                                         setAllocations(filtered);
                                     });
 
                                 fetch(
-                                    `/api/academic/routines?sessionId=${selectedSession}&batch=${batch}&section=${section}`
+                                    `/api/academic/routines?sessionId=${selectedSession}&batch=${batch}&section=${section}`,
                                 )
                                     .then((res) => res.json())
                                     .then((data) => setRoutines(data));

@@ -1,34 +1,31 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import useSWR from 'swr';
 import { Course } from '@/types';
 import { CourseService } from '@/services';
 import { useToast } from '@/components/ui/toast';
 
 export function useCourses() {
-    const [courses, setCourses] = useState<Course[]>([]);
-    const [loading, setLoading] = useState(true);
     const { addToast } = useToast();
-
-    const fetchCourses = async () => {
-        try {
-            setLoading(true);
-            const data = await CourseService.getAll();
-            setCourses(data);
-        } catch (error) {
-            console.error(error);
-            addToast('Failed to load courses', 'error');
-        } finally {
-            setLoading(false);
-        }
-    };
+    const {
+        data: courses = [],
+        error,
+        isLoading,
+        mutate,
+    } = useSWR<Course[]>('/api/courses', CourseService.getAll, {
+        revalidateOnFocus: false,
+    });
 
     useEffect(() => {
-        fetchCourses();
-    }, []);
+        if (error) {
+            console.error(error);
+            addToast('Failed to load courses', 'error');
+        }
+    }, [error, addToast]);
 
     const addCourse = async (course: Omit<Course, 'id'>) => {
         try {
             const newCourse = await CourseService.create(course);
-            setCourses((prev) => [...prev, newCourse]);
+            mutate([...courses, newCourse], false);
             addToast('Course added successfully', 'success');
             return newCourse;
         } catch (error: unknown) {
@@ -44,7 +41,10 @@ export function useCourses() {
         if (!confirm('Are you sure you want to delete this course?')) return;
         try {
             await CourseService.delete(id);
-            setCourses((prev) => prev.filter((c) => c.id !== id));
+            mutate(
+                courses.filter((c) => c.id !== id),
+                false,
+            );
             addToast('Course deleted successfully', 'success');
         } catch (error: unknown) {
             addToast(
@@ -59,7 +59,10 @@ export function useCourses() {
     const updateCourse = async (id: number, data: Partial<Course>) => {
         try {
             const updated = await CourseService.update(id, data);
-            setCourses((prev) => prev.map((c) => (c.id === id ? updated : c)));
+            mutate(
+                courses.map((c) => (c.id === id ? updated : c)),
+                false,
+            );
             addToast('Course updated successfully', 'success');
             return updated;
         } catch (error: unknown) {
@@ -75,10 +78,10 @@ export function useCourses() {
 
     return {
         courses,
-        loading,
+        loading: isLoading,
         addCourse,
         updateCourse,
         deleteCourse,
-        refresh: fetchCourses,
+        refresh: () => mutate(),
     };
 }

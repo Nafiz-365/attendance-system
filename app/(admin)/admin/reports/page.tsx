@@ -67,7 +67,7 @@ export default function ReportsPage() {
     const [stats, setStats] = useState<ReportStats | null>(null);
     const [activities, setActivities] = useState<Activity[]>([]);
     const [monthDate, setMonthDate] = useState(
-        new Date().toISOString().split('T')[0]
+        new Date().toISOString().split('T')[0],
     );
     const [monthBatch, setMonthBatch] = useState('50');
     const [exporting, setExporting] = useState(false);
@@ -112,7 +112,7 @@ export default function ReportsPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     startDate: new Date(
-                        Date.now() - 30 * 24 * 60 * 60 * 1000
+                        Date.now() - 30 * 24 * 60 * 60 * 1000,
                     ).toISOString(),
                     endDate: new Date().toISOString(),
                 }),
@@ -148,7 +148,7 @@ export default function ReportsPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     startDate: new Date(
-                        Date.now() - 30 * 24 * 60 * 60 * 1000
+                        Date.now() - 30 * 24 * 60 * 60 * 1000,
                     ).toISOString(),
                     endDate: new Date().toISOString(),
                 }),
@@ -369,7 +369,7 @@ export default function ReportsPage() {
                                                     fill={entry.fill}
                                                     strokeWidth={0}
                                                 />
-                                            )
+                                            ),
                                         )}
                                     </Pie>
                                     <Tooltip
@@ -421,7 +421,7 @@ export default function ReportsPage() {
                                 onClick={() =>
                                     window.open(
                                         '/api/reports/defaulters',
-                                        '_blank'
+                                        '_blank',
                                     )
                                 }
                             >
@@ -500,7 +500,7 @@ export default function ReportsPage() {
                                                 <p className="text-[10px] text-muted-foreground/60">
                                                     {format(
                                                         new Date(activity.time),
-                                                        'MMM d, h:mm a'
+                                                        'MMM d, h:mm a',
                                                     )}
                                                 </p>
                                             </div>

@@ -68,7 +68,7 @@ export default function TeacherLeavesPage() {
 
     const handleUpdateStatus = async (
         id: number,
-        status: 'APPROVED' | 'REJECTED'
+        status: 'APPROVED' | 'REJECTED',
     ) => {
         setUpdatingId(id);
         try {
@@ -195,7 +195,7 @@ export default function TeacherLeavesPage() {
                             >
                                 {
                                     studentRequests.filter(
-                                        (l) => l.status === 'PENDING'
+                                        (l) => l.status === 'PENDING',
                                     ).length
                                 }
                             </Badge>
@@ -241,9 +241,9 @@ export default function TeacherLeavesPage() {
                                                 <TableCell>
                                                     {format(
                                                         new Date(
-                                                            leave.createdAt
+                                                            leave.createdAt,
                                                         ),
-                                                        'MMM d, yyyy'
+                                                        'MMM d, yyyy',
                                                     )}
                                                 </TableCell>
                                                 <TableCell>
@@ -251,16 +251,16 @@ export default function TeacherLeavesPage() {
                                                         <Calendar className="h-4 w-4 text-muted-foreground" />
                                                         {format(
                                                             new Date(
-                                                                leave.startDate
+                                                                leave.startDate,
                                                             ),
-                                                            'MMM d'
+                                                            'MMM d',
                                                         )}{' '}
                                                         -{' '}
                                                         {format(
                                                             new Date(
-                                                                leave.endDate
+                                                                leave.endDate,
                                                             ),
-                                                            'MMM d, yyyy'
+                                                            'MMM d, yyyy',
                                                         )}
                                                     </div>
                                                 </TableCell>
@@ -272,7 +272,7 @@ export default function TeacherLeavesPage() {
                                                 </TableCell>
                                                 <TableCell>
                                                     {getStatusBadge(
-                                                        leave.status
+                                                        leave.status,
                                                     )}
                                                 </TableCell>
                                             </TableRow>
@@ -312,8 +312,8 @@ export default function TeacherLeavesPage() {
                                         leave.status === 'APPROVED'
                                             ? 'bg-green-500'
                                             : leave.status === 'REJECTED'
-                                            ? 'bg-red-500'
-                                            : 'bg-orange-500'
+                                              ? 'bg-red-500'
+                                              : 'bg-orange-500'
                                     }`}
                                 ></div>
                                 <CardHeader className="pb-2">
@@ -337,12 +337,12 @@ export default function TeacherLeavesPage() {
                                         <span className="font-semibold">
                                             {format(
                                                 new Date(leave.startDate),
-                                                'MMM d'
+                                                'MMM d',
                                             )}{' '}
                                             -{' '}
                                             {format(
                                                 new Date(leave.endDate),
-                                                'MMM d'
+                                                'MMM d',
                                             )}
                                         </span>
                                     </div>
@@ -355,7 +355,7 @@ export default function TeacherLeavesPage() {
                                                 onClick={() =>
                                                     handleUpdateStatus(
                                                         leave.id,
-                                                        'APPROVED'
+                                                        'APPROVED',
                                                     )
                                                 }
                                                 disabled={
@@ -375,7 +375,7 @@ export default function TeacherLeavesPage() {
                                                 onClick={() =>
                                                     handleUpdateStatus(
                                                         leave.id,
-                                                        'REJECTED'
+                                                        'REJECTED',
                                                     )
                                                 }
                                                 disabled={

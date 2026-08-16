@@ -180,7 +180,7 @@ export default function StudentAttendancePage() {
                                             <span className="font-medium">
                                                 {format(
                                                     new Date(record.date),
-                                                    'PPP'
+                                                    'PPP',
                                                 )}
                                             </span>
                                             {record.allocation?.course && (

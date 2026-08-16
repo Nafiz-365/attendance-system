@@ -61,7 +61,7 @@ export default function AttendancePage() {
                 console.error(
                     'Failed to fetch departments:',
                     res.status,
-                    res.statusText
+                    res.statusText,
                 );
             }
         } catch (err) {
@@ -81,10 +81,10 @@ export default function AttendancePage() {
         setLoading(true);
         try {
             console.log(
-                `Fetching students: /api/students?departmentId=${selectedDept}&batch=${batch}&section=${section}`
+                `Fetching students: /api/students?departmentId=${selectedDept}&batch=${batch}&section=${section}`,
             );
             const studentsRes = await fetch(
-                `/api/students?departmentId=${selectedDept}&batch=${batch}&section=${section}`
+                `/api/students?departmentId=${selectedDept}&batch=${batch}&section=${section}`,
             );
 
             if (!studentsRes.ok) {
@@ -95,15 +95,15 @@ export default function AttendancePage() {
             console.log('Students loaded:', studentsData);
 
             console.log(
-                `Fetching attendance: /api/attendance?date=${date}&batch=${batch}&section=${section}`
+                `Fetching attendance: /api/attendance?date=${date}&batch=${batch}&section=${section}`,
             );
             const attendanceRes = await fetch(
-                `/api/attendance?date=${date}&batch=${batch}&section=${section}`
+                `/api/attendance?date=${date}&batch=${batch}&section=${section}`,
             );
 
             if (!attendanceRes.ok) {
                 throw new Error(
-                    `Attendance API failed: ${attendanceRes.status}`
+                    `Attendance API failed: ${attendanceRes.status}`,
                 );
             }
 
@@ -119,7 +119,7 @@ export default function AttendancePage() {
                 attendanceData.forEach(
                     (a: { studentId: number; status: string }) => {
                         attMap[a.studentId] = a.status;
-                    }
+                    },
                 );
             }
 
@@ -145,7 +145,7 @@ export default function AttendancePage() {
                 ([studentId, status]) => ({
                     studentId: parseInt(studentId),
                     status,
-                })
+                }),
             );
 
             const res = await fetch('/api/attendance/bulk', {
@@ -308,15 +308,15 @@ export default function AttendancePage() {
                                                                   'Present'
                                                                     ? 'default'
                                                                     : status ===
-                                                                      'Absent'
-                                                                    ? 'destructive'
-                                                                    : 'secondary'
+                                                                        'Absent'
+                                                                      ? 'destructive'
+                                                                      : 'secondary'
                                                                 : 'outline'
                                                         }
                                                         onClick={() =>
                                                             handleStatusChange(
                                                                 student.id,
-                                                                status
+                                                                status,
                                                             )
                                                         }
                                                         className={`w-24 ${

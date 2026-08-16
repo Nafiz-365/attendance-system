@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/toast';
-import { StudentImportModal } from '@/components/student-import-modal';
+import { GenericImportModal } from '@/components/generic-import-modal';
 
 interface Student {
     id: number;
@@ -484,10 +484,56 @@ export default function StudentsPage() {
                 </form>
             </Modal>
 
-            <StudentImportModal
+            <GenericImportModal<StudentData>
                 isOpen={isImportModalOpen}
                 onClose={() => setIsImportModalOpen(false)}
+                title="Import Students"
                 onImport={handleImport}
+                dataFormatter={(row) => {
+                    const studentId = String(
+                        row['Student ID'] ||
+                            row['studentId'] ||
+                            row['ID'] ||
+                            '',
+                    );
+                    const name = String(row['Name'] || row['name'] || '');
+                    if (!studentId || !name) return null;
+                    return {
+                        studentId,
+                        name,
+                        email: String(row['Email'] || row['email'] || ''),
+                        batch: String(row['Batch'] || row['batch'] || ''),
+                        section: String(row['Section'] || row['section'] || ''),
+                        departmentId: String(
+                            row['Department ID'] || row['departmentId'] || '',
+                        ),
+                    };
+                }}
+                previewColumns={[
+                    { key: 'studentId', label: 'ID' },
+                    { key: 'name', label: 'Name' },
+                    { key: 'batch', label: 'Batch' },
+                    { key: 'section', label: 'Section' },
+                    { key: 'departmentId', label: 'Dept', align: 'right' },
+                ]}
+                templateHeaders={[
+                    'Student ID',
+                    'Name',
+                    'Email',
+                    'Batch',
+                    'Section',
+                    'Department ID',
+                ]}
+                templateSampleRow={[
+                    'S101',
+                    'John Doe',
+                    'john@example.com',
+                    '50',
+                    'A',
+                    '1',
+                ]}
+                templateFilename="student_import_template.xlsx"
+                importLabel="Import Students"
             />
         </div>
     );

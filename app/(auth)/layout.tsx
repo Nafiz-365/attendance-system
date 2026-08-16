@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { ModeToggle } from "@/components/layout/theme-toggle";
+import { motion } from 'framer-motion';
+import { ModeToggle } from '@/components/layout/theme-toggle';
 
 export default function AuthLayout({
     children,
@@ -26,7 +26,7 @@ export default function AuthLayout({
                     transition={{
                         duration: 20,
                         repeat: Infinity,
-                        ease: "linear",
+                        ease: 'linear',
                     }}
                     className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-purple-300/30 dark:bg-purple-900/20 blur-3xl mix-blend-multiply dark:mix-blend-screen"
                 />
@@ -40,7 +40,7 @@ export default function AuthLayout({
                     transition={{
                         duration: 15,
                         repeat: Infinity,
-                        ease: "linear",
+                        ease: 'linear',
                     }}
                     className="absolute top-[20%] -right-[10%] w-[40%] h-[40%] rounded-full bg-blue-300/30 dark:bg-blue-900/20 blur-3xl mix-blend-multiply dark:mix-blend-screen"
                 />
@@ -54,7 +54,7 @@ export default function AuthLayout({
                     transition={{
                         duration: 18,
                         repeat: Infinity,
-                        ease: "linear",
+                        ease: 'linear',
                     }}
                     className="absolute -bottom-[20%] left-[20%] w-[60%] h-[60%] rounded-full bg-indigo-300/30 dark:bg-indigo-900/20 blur-3xl mix-blend-multiply dark:mix-blend-screen"
                 />
@@ -67,7 +67,7 @@ export default function AuthLayout({
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
                 className="relative z-10 w-full max-w-5xl flex items-center justify-center"
             >
                 {children}

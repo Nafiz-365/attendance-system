@@ -26,7 +26,7 @@ import { Modal } from '@/components/ui/modal';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/toast';
 
-import { TeacherImportModal } from '@/components/teacher-import-modal';
+import { GenericImportModal } from '@/components/generic-import-modal';
 
 interface Teacher {
     id: number;
@@ -485,10 +485,58 @@ export default function TeachersPage() {
                 teacher={allocatingTeacher}
             />
 
-            <TeacherImportModal
+            <GenericImportModal<{
+                name: string;
+                employeeId: string;
+                email: string;
+                phone?: string;
+                departmentId?: string | undefined;
+            }>
                 isOpen={isImportModalOpen}
                 onClose={() => setIsImportModalOpen(false)}
+                title="Import Teachers"
                 onImport={handleImport}
+                dataFormatter={(row) => {
+                    const employeeId = String(
+                        row['Employee ID'] ||
+                            row['employeeId'] ||
+                            row['ID'] ||
+                            '',
+                    );
+                    const name = String(row['Name'] || row['name'] || '');
+                    if (!employeeId || !name) return null;
+                    return {
+                        employeeId,
+                        name,
+                        email: String(row['Email'] || row['email'] || ''),
+                        phone: String(row['Phone'] || row['phone'] || ''),
+                        departmentId: String(
+                            row['Department ID'] || row['departmentId'] || '',
+                        ),
+                    };
+                }}
+                previewColumns={[
+                    { key: 'employeeId', label: 'ID' },
+                    { key: 'name', label: 'Name' },
+                    { key: 'email', label: 'Email' },
+                    { key: 'departmentId', label: 'Dept', align: 'right' },
+                ]}
+                templateHeaders={[
+                    'Employee ID',
+                    'Name',
+                    'Email',
+                    'Phone',
+                    'Department ID',
+                ]}
+                templateSampleRow={[
+                    'T101',
+                    'Dr. Smith',
+                    'smith@example.com',
+                    '1234567890',
+                    '1',
+                ]}
+                templateFilename="teacher_import_template.xlsx"
+                importLabel="Import Teachers"
             />
         </div>
     );

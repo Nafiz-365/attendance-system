@@ -76,7 +76,7 @@ export default function PromotionPage() {
 
     const toggleSelection = (id: number) => {
         setSelectedIds((prev) =>
-            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
         );
     };
 
@@ -100,7 +100,7 @@ export default function PromotionPage() {
 
         if (
             !confirm(
-                `Promote ${selectedIds.length} students to ${newSemester}?`
+                `Promote ${selectedIds.length} students to ${newSemester}?`,
             )
         )
             return;
@@ -122,7 +122,7 @@ export default function PromotionPage() {
             const data = await res.json();
             addToast(
                 `Successfully promoted ${data.count} students!`,
-                'success'
+                'success',
             );
 
             // Refresh data
@@ -233,11 +233,11 @@ export default function PromotionPage() {
                                                     <input
                                                         type="checkbox"
                                                         checked={selectedIds.includes(
-                                                            s.id
+                                                            s.id,
                                                         )}
                                                         onChange={() =>
                                                             toggleSelection(
-                                                                s.id
+                                                                s.id,
                                                             )
                                                         }
                                                     />

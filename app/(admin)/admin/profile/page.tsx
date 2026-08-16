@@ -90,7 +90,7 @@ export default function AdminProfilePage() {
                 if (!updateRes.ok) {
                     const err = await updateRes.json();
                     throw new Error(
-                        err.details || err.error || 'Update failed'
+                        err.details || err.error || 'Update failed',
                     );
                 }
 
@@ -168,7 +168,7 @@ export default function AdminProfilePage() {
                                     onClick={async () => {
                                         if (
                                             !confirm(
-                                                'Are you sure you want to remove your profile picture?'
+                                                'Are you sure you want to remove your profile picture?',
                                             )
                                         )
                                             return;
@@ -186,7 +186,7 @@ export default function AdminProfilePage() {
                                                         id: user.id,
                                                         image: null,
                                                     }),
-                                                }
+                                                },
                                             );
 
                                             if (res.ok) {
@@ -197,28 +197,28 @@ export default function AdminProfilePage() {
                                                 setUser(newUser);
                                                 localStorage.setItem(
                                                     'user',
-                                                    JSON.stringify(newUser)
+                                                    JSON.stringify(newUser),
                                                 );
                                                 addToast(
                                                     'Profile picture removed successfully',
-                                                    'success'
+                                                    'success',
                                                 );
                                                 window.dispatchEvent(
-                                                    new Event('storage')
+                                                    new Event('storage'),
                                                 );
                                             } else {
                                                 throw new Error(
-                                                    'Failed to update'
+                                                    'Failed to update',
                                                 );
                                             }
                                         } catch (error) {
                                             console.error(
                                                 'Delete error:',
-                                                error
+                                                error,
                                             );
                                             addToast(
                                                 'Failed to remove picture',
-                                                'error'
+                                                'error',
                                             );
                                         }
                                     }}

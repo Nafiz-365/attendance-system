@@ -1,4 +1,3 @@
-
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
@@ -19,7 +18,6 @@ async function main() {
     await prisma.academicSession.deleteMany();
     await prisma.department.deleteMany();
     await prisma.user.deleteMany();
-
 
     // 2. Create Admin
     console.log('👤 Creating Admin...');

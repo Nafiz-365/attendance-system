@@ -214,7 +214,7 @@ export default function StudentLeavesPage() {
                                     Applied on{' '}
                                     {format(
                                         new Date(leave.createdAt),
-                                        'MMM d, yyyy'
+                                        'MMM d, yyyy',
                                     )}
                                 </div>
                                 {getStatusBadge(leave.status)}
@@ -228,12 +228,12 @@ export default function StudentLeavesPage() {
                                         <Clock className="mr-2 h-4 w-4" />
                                         {format(
                                             new Date(leave.startDate),
-                                            'MMM d'
+                                            'MMM d',
                                         )}{' '}
                                         -{' '}
                                         {format(
                                             new Date(leave.endDate),
-                                            'MMM d, yyyy'
+                                            'MMM d, yyyy',
                                         )}
                                     </div>
                                 </div>

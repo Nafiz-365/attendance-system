@@ -81,7 +81,7 @@ export default function TeacherDashboard() {
 
                 try {
                     const res = await fetch(
-                        `/api/teacher/stats?email=${userData.email}`
+                        `/api/teacher/stats?email=${userData.email}`,
                     );
                     if (res.ok) {
                         const data = await res.json();
@@ -106,7 +106,7 @@ export default function TeacherDashboard() {
                     // Filter for teachers
                     const teacherNotices = allNotices.filter(
                         (n: Notice) =>
-                            n.audience === 'ALL' || n.audience === 'TEACHERS'
+                            n.audience === 'ALL' || n.audience === 'TEACHERS',
                     );
                     setNotices(teacherNotices.slice(0, 3));
                 }
@@ -287,7 +287,7 @@ export default function TeacherDashboard() {
                                             </p>
                                             <p className="text-[10px] text-muted-foreground/60 mt-1">
                                                 {new Date(
-                                                    notice.createdAt
+                                                    notice.createdAt,
                                                 ).toLocaleDateString()}
                                             </p>
                                         </div>

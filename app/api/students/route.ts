@@ -162,12 +162,16 @@ export async function POST(request: Request) {
 
         return NextResponse.json(newStudent);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Failed to create student:', error);
-        if (error.code === 'P2002') {
-            const target = error.meta?.target;
+        
+        // Handle Prisma Client Known Request Error
+        if (typeof error === 'object' && error !== null && 'code' in error && (error as any).code === 'P2002') {
+            const target = (error as any).meta?.target;
             return NextResponse.json({ error: `Student with this ${target ? target : 'ID/Email'} already exists` }, { status: 409 });
         }
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+        
+        const message = error instanceof Error ? error.message : 'Internal Server Error';
+        return NextResponse.json({ error: message }, { status: 500 });
     }
 }

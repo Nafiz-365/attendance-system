@@ -75,10 +75,17 @@ export async function POST(req: Request) {
         });
 
         return NextResponse.json(result);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error(error);
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
+            return NextResponse.json(
+                { error: "A teacher with this employee ID already exists in the department" },
+                { status: 409 }
+            );
+        }
+        const message = error instanceof Error ? error.message : "Failed to create teacher";
         return NextResponse.json(
-            { error: error.message || "Failed to create teacher" },
+            { error: message },
             { status: 500 }
         );
     }

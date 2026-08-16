@@ -49,8 +49,14 @@ export async function POST(request: Request) {
         });
 
         return NextResponse.json(newCourse);
-    } catch (error) {
+    } catch (error: unknown) {
         console.error(error);
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
+            return NextResponse.json(
+                { error: "A course with this code already exists" },
+                { status: 409 }
+            );
+        }
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
